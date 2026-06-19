@@ -1,3 +1,9 @@
 <Solution>
+  <Folder Name="/Partners.Core/">
+    <Project Path="Partners.Core/Partners.Core.csproj" />
+  </Folder>
+  <Folder Name="/Partners.Dal/">
+    <Project Path="Partners.Dal/Partners.Dal.csproj" />
+  </Folder>
   <Project Path="Partners.Api/Partners.Api.csproj" />
 </Solution>
