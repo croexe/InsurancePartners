@@ -15,4 +15,8 @@
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Partners.Core\Partners.Core.csproj" />
+  </ItemGroup>
+
 </Project>
