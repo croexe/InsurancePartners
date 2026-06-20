@@ -18,6 +18,7 @@ builder.Services.AddSingleton<IDbConnectionFactory>(_ =>
 builder.Services.AddScoped<IPartnerRepository, PartnerRepository>();
 builder.Services.AddScoped<IPolicyRepository, PolicyRepository>();
 builder.Services.AddScoped<IPartnerService, PartnerService>();
+builder.Services.AddScoped<IPolicyService, PolicyService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
