@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Connections;
 using Partners.Core.Contracts;
+using Partners.Core.Services;
 using Partners.Dal.Database;
 using Partners.Dal.Repositories;
 
