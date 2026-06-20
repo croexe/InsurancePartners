@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Partners.Core.Contracts;
+using Partners.Core.DTOs.Responses;
 using Partners.Core.Models;
 using Partners.Dal.Database;
 
@@ -45,28 +46,21 @@ namespace Partners.Dal.Repositories
             return await connection.QuerySingleAsync<int>(sql, parameters);
         }
 
-        public async Task<int> GetCountByPartnerIdAsync(int partnerId)
+        public async Task<IReadOnlyDictionary<int, PartnerPolicySummaryResponse>> GetSummariesForAllPartnersAsync()
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 
             const string sql = @"
-            SELECT COUNT(1)
+            SELECT
+                PartnerId,
+                COUNT(1)            AS PolicyCount,
+                ISNULL(SUM(Amount), 0) AS TotalAmount
             FROM dbo.Policy
-            WHERE PartnerId = @PartnerId";
+            GROUP BY PartnerId";
 
-            return await connection.QuerySingleAsync<int>(sql, new { PartnerId = partnerId });
-        }
+            var rows = await connection.QueryAsync<PartnerPolicySummaryResponse>(sql);
 
-        public async Task<decimal> GetTotalAmountByPartnerIdAsync(int partnerId)
-        {
-            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
-
-            const string sql = @"
-            SELECT ISNULL(SUM(Amount), 0)
-            FROM dbo.Policy
-            WHERE PartnerId = @PartnerId";
-
-            return await connection.QuerySingleAsync<decimal>(sql, new { PartnerId = partnerId });
+            return rows.ToDictionary(r => r.PartnerId, r => r);
         }
     }
 }

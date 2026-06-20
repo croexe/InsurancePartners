@@ -1,4 +1,5 @@
-﻿using Partners.Core.Models;
+﻿using Partners.Core.DTOs.Responses;
+using Partners.Core.Models;
 
 namespace Partners.Core.Contracts
 {
@@ -6,7 +7,6 @@ namespace Partners.Core.Contracts
     {
         Task<IEnumerable<Policy>> GetByPartnerIdAsync(int partnerId);
         Task<int> CreateAsync(Policy policy);
-        Task<int> GetCountByPartnerIdAsync(int partnerId);
-        Task<decimal> GetTotalAmountByPartnerIdAsync(int partnerId);
+        Task<IReadOnlyDictionary<int, PartnerPolicySummaryResponse>> GetSummariesForAllPartnersAsync();
     }
 }
