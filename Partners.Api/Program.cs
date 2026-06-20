@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Connections;
+using Partners.Core.Contracts;
 using Partners.Dal.Database;
+using Partners.Dal.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddSingleton<IDbConnectionFactory>(_ =>
     new SqlConnectionFactory(
         builder.Configuration.GetConnectionString("InsurancePartnersDb")!));
+builder.Services.AddScoped<IPartnerRepository, PartnerRepository>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
