@@ -1,4 +1,4 @@
-﻿using Partners.Core.Enums;
+﻿using Partners.Core.Models.Enums;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 

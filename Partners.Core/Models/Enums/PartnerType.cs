@@ -1,4 +1,4 @@
-﻿namespace Partners.Core.Enums;
+﻿namespace Partners.Core.Models.Enums;
 
 public enum PartnerType
 {

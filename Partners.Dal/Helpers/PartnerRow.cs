@@ -1,5 +1,5 @@
-﻿using Partners.Core.Enums;
-using Partners.Core.Models;
+﻿using Partners.Core.Models;
+using Partners.Core.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;

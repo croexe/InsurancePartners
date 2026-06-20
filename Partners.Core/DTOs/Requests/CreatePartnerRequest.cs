@@ -1,4 +1,4 @@
-﻿using Partners.Core.Enums;
+﻿using Partners.Core.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace Partners.Core.DTOs.Requests
