@@ -2,6 +2,7 @@
 using Partners.Core.DTOs.Requests;
 using Partners.Core.DTOs.Responses;
 using Partners.Core.Models;
+using Partners.Core.Models.Rules.Partner;
 using Partners.Core.Results;
 
 namespace Partners.Core.Services
@@ -10,11 +11,13 @@ namespace Partners.Core.Services
     {
         private readonly IPolicyRepository _policyRepository;
         private readonly IPartnerRepository _partnerRepository;
+        private readonly IPartnerNotifier _partnerNotifier;
 
-        public PolicyService(IPolicyRepository policyRepository, IPartnerRepository partnerRepository)
+        public PolicyService(IPolicyRepository policyRepository, IPartnerRepository partnerRepository, IPartnerNotifier partnerNotifier)
         {
             _policyRepository = policyRepository;
             _partnerRepository = partnerRepository;
+            _partnerNotifier = partnerNotifier;
         }
 
         public async Task<PolicyServiceResult> CreateAsync(CreatePolicyRequest request)
@@ -58,6 +61,13 @@ namespace Partners.Core.Services
                 Amount = policy.Amount,
                 PartnerId = policy.PartnerId
             };
+
+            var allPartnerPolicies = await _policyRepository.GetByPartnerIdAsync(policy.PartnerId);
+            var newPolicyCount = allPartnerPolicies.Count();
+            var newTotalAmount = allPartnerPolicies.Sum(p => p.Amount);
+            var isFlagged = PartnerFlagRules.IsFlagged(newPolicyCount, newTotalAmount);
+
+            await _partnerNotifier.NotifyPartnerFlagChangedAsync(policy.PartnerId, isFlagged);
 
             return PolicyServiceResult.Ok(response);
         }

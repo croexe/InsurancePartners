@@ -2,6 +2,7 @@
 using Partners.Core.DTOs.Requests;
 using Partners.Core.DTOs.Responses;
 using Partners.Core.Models;
+using Partners.Core.Models.Rules.Partner;
 using Partners.Core.Results;
 using Partners.Core.Validators;
  
@@ -9,8 +10,6 @@ namespace Partners.Core.Services
 {
     public class PartnerService : IPartnerService
     {
-        private const int MaxPolicyCountBeforeFlag = 5;
-        private const decimal MaxPolicyAmountBeforeFlag = 5000m;
 
         private readonly IPartnerRepository _partnerRepository;
         private readonly IPolicyRepository _policyRepository;
@@ -147,7 +146,7 @@ namespace Partners.Core.Services
         }
 
         private static bool IsFlagged(int policyCount, decimal totalAmount) =>
-            policyCount > MaxPolicyCountBeforeFlag || totalAmount > MaxPolicyAmountBeforeFlag;
+            PartnerFlagRules.IsFlagged(policyCount, totalAmount);
 
         private static (int PolicyCount, decimal TotalAmount) GetSummaryOrDefault(
             IReadOnlyDictionary<int, PartnerPolicySummaryResponse> summaries, int partnerId)
