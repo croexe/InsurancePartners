@@ -1,6 +1,187 @@
 @Partners.Api_HostAddress = http://localhost:5190
 
-GET {{Partners.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### ========================================
+### PARTNERS - happy path
+### ========================================
+
+### Create a partner (Personal)
+POST {{Partners.Api_HostAddress}}/api/partners
+Content-Type: application/json
+
+{
+  "firstName": "Ivan",
+  "lastName": "Horvat",
+  "address": "Ilica 5, Zagreb",
+  "partnerNumber": "12345678901234567890",
+  "croatianPIN": null,
+  "partnerTypeId": 1,
+  "createByUser": "admin@example.com",
+  "isForeign": false,
+  "externalCode": "EXT1234567",
+  "gender": "M"
+}
+
+### Create a partner (Legal)
+POST {{Partners.Api_HostAddress}}/api/partners
+Content-Type: application/json
+
+{
+  "firstName": "Marko",
+  "lastName": "Maric",
+  "address": "Vukovarska 10, Split",
+  "partnerNumber": "98765432109876543210",
+  "croatianPIN": null,
+  "partnerTypeId": 2,
+  "createByUser": "admin@example.com",
+  "isForeign": false,
+  "externalCode": "EXT7654321",
+  "gender": "F"
+}
+
+### Get all partners (list - without FirstName/LastName/Address/CreateByUser/ExternalCode)
+GET {{Partners.Api_HostAddress}}/api/partners
+
+### Get partner by Id (detail - everything, FullName merged, + list of policies)
+GET {{Partners.Api_HostAddress}}/api/partners/1
+
+
+### ========================================
+### POLICIES - happy path
+### ========================================
+
+### Create first policy (1500.50, partner 1)
+POST {{Partners.Api_HostAddress}}/api/policies
+Content-Type: application/json
+
+{
+  "policyNumber": "POL0000001",
+  "amount": 1500.50,
+  "partnerId": 1
+}
+
+### Create second policy (2500.50, partner 1) - total 4001.00, still under 5000
+POST {{Partners.Api_HostAddress}}/api/policies
+Content-Type: application/json
+
+{
+  "policyNumber": "POL0000002",
+  "amount": 2500.50,
+  "partnerId": 1
+}
+
+### Check partner 1 - expected isFlagged: false (4001.00 < 5000, 2 policies < 5)
+GET {{Partners.Api_HostAddress}}/api/partners/1
+
+### Create third policy (1500, partner 1) - total 5501.00, exceeds 5000
+POST {{Partners.Api_HostAddress}}/api/policies
+Content-Type: application/json
+
+{
+  "policyNumber": "POL0000003",
+  "amount": 1500.00,
+  "partnerId": 1
+}
+
+### Check partner 1 again - expected isFlagged: true (5501.00 > 5000)
+GET {{Partners.Api_HostAddress}}/api/partners/1
+
+
+### ========================================
+### VALIDATION / ERROR CASES
+### ========================================
+
+### Duplicate ExternalCode - expected 400, "ExternalCode '...' is already in use."
+POST {{Partners.Api_HostAddress}}/api/partners
+Content-Type: application/json
+
+{
+  "firstName": "Petar",
+  "lastName": "Peric",
+  "address": "Test address 1",
+  "partnerNumber": "11111111111111111111",
+  "croatianPIN": null,
+  "partnerTypeId": 1,
+  "createByUser": "admin@example.com",
+  "isForeign": false,
+  "externalCode": "EXT1234567",
+  "gender": "M"
+}
+
+### Policy for a non-existent partner - expected 400, "Partner with Id '999' does not exist."
+POST {{Partners.Api_HostAddress}}/api/policies
+Content-Type: application/json
+
+{
+  "policyNumber": "POL0009999",
+  "amount": 1000,
+  "partnerId": 999
+}
+
+### Invalid OIB (wrong checksum) - expected 400, "CroatianPIN (OIB) is not valid."
+POST {{Partners.Api_HostAddress}}/api/partners
+Content-Type: application/json
+
+{
+  "firstName": "Ana",
+  "lastName": "Anic",
+  "address": "Test address 2",
+  "partnerNumber": "22222222222222222222",
+  "croatianPIN": "12345678901",
+  "partnerTypeId": 1,
+  "createByUser": "admin@example.com",
+  "isForeign": false,
+  "externalCode": "EXT9999999",
+  "gender": "F"
+}
+
+### PartnerNumber wrong format (fewer than 20 digits) - expected 400 (ModelState)
+POST {{Partners.Api_HostAddress}}/api/partners
+Content-Type: application/json
+
+{
+  "firstName": "Ana",
+  "lastName": "Anic",
+  "address": "Test address 3",
+  "partnerNumber": "123",
+  "croatianPIN": null,
+  "partnerTypeId": 1,
+  "createByUser": "admin@example.com",
+  "isForeign": false,
+  "externalCode": "EXT8888888",
+  "gender": "F"
+}
+
+### FirstName shorter than 2 characters - expected 400 (ModelState)
+POST {{Partners.Api_HostAddress}}/api/partners
+Content-Type: application/json
+
+{
+  "firstName": "A",
+  "lastName": "Anic",
+  "address": "Test address 4",
+  "partnerNumber": "33333333333333333333",
+  "croatianPIN": null,
+  "partnerTypeId": 1,
+  "createByUser": "admin@example.com",
+  "isForeign": false,
+  "externalCode": "EXT7777777",
+  "gender": "F"
+}
+
+### Missing required field (gender) - expected 400 (ModelState - "Gender is required.")
+POST {{Partners.Api_HostAddress}}/api/partners
+Content-Type: application/json
+
+{
+  "firstName": "Ana",
+  "lastName": "Anic",
+  "address": "Test address 5",
+  "partnerNumber": "44444444444444444444",
+  "croatianPIN": null,
+  "partnerTypeId": 1,
+  "createByUser": "admin@example.com",
+  "isForeign": false,
+  "externalCode": "EXT6666666"
+}
 
 ###
