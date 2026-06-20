@@ -2,6 +2,7 @@
 using Partners.Core.Contracts;
 using Partners.Core.Models;
 using Partners.Dal.Database;
+using Partners.Dal.Helpers;
 
 namespace Partners.Dal.Repositories
 {
@@ -25,7 +26,8 @@ namespace Partners.Dal.Repositories
             FROM dbo.Partner
             ORDER BY CreatedAtUtc DESC";
 
-            return await connection.QueryAsync<Partner>(sql);
+            var rows = await connection.QueryAsync<PartnerRow>(sql);
+            return rows.Select(row => row.ToPartner());
         }
 
         public async Task<Partner?> GetByIdAsync(int id)
@@ -39,7 +41,8 @@ namespace Partners.Dal.Repositories
             FROM dbo.Partner
             WHERE Id = @Id";
 
-            return await connection.QuerySingleOrDefaultAsync<Partner>(sql, new { Id = id });
+            var row = await connection.QuerySingleOrDefaultAsync<PartnerRow>(sql, new { Id = id });
+            return row?.ToPartner();
         }
 
         public async Task<int> CreateAsync(Partner partner)
