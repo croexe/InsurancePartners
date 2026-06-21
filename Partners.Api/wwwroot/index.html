@@ -1,0 +1,242 @@
+﻿<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insurance Partners</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+          integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+
+    <header class="topbar">
+        <div class="topbar__inner">
+            <div class="topbar__brand">
+                <span class="topbar__mark">IP</span>
+                <span class="topbar__title">Insurance Partners</span>
+            </div>
+            <div class="topbar__status" id="connectionStatus">
+                <span class="status-dot"></span>
+                <span class="status-text">Spajanje...</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="page">
+
+        <!-- ===================== VIEW: PARTNER LIST ===================== -->
+        <section id="view-list" class="view">
+            <div class="view-header">
+                <div>
+                    <p class="eyebrow">Registar partnera</p>
+                    <h1 class="view-title">Partneri</h1>
+                </div>
+                <div class="view-actions">
+                    <button type="button" class="btn btn-ghost" id="btnOpenPolicyDialog">
+                        Dodaj policu
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btnGoToPartnerForm">
+                        Novi partner
+                    </button>
+                </div>
+            </div>
+
+            <div id="listAlert"></div>
+
+            <div class="card-panel">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Naziv</th>
+                            <th>Broj partnera</th>
+                            <th>OIB</th>
+                            <th>Vrsta</th>
+                            <th>Datum unosa</th>
+                            <th>Stranac</th>
+                            <th>Spol</th>
+                        </tr>
+                    </thead>
+                    <tbody id="partnerTableBody">
+                        <tr><td colspan="7" class="empty-cell">Učitavanje...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ===================== VIEW: NEW PARTNER FORM ===================== -->
+        <section id="view-partner-form" class="view d-none">
+            <div class="view-header">
+                <div>
+                    <p class="eyebrow">Novi unos</p>
+                    <h1 class="view-title">Novi partner</h1>
+                </div>
+                <div class="view-actions">
+                    <button type="button" class="btn btn-ghost" id="btnBackToListFromForm">
+                        ← Natrag na listu
+                    </button>
+                </div>
+            </div>
+
+            <div id="formAlert"></div>
+
+            <div class="card-panel card-panel--form">
+                <form id="partnerForm" novalidate>
+
+                    <p class="form-section-label">Osnovni podaci</p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">Ime <span class="req">*</span></label>
+                            <input type="text" class="form-control" id="firstName" required minlength="2" maxlength="255">
+                            <div class="invalid-feedback">Ime mora imati najmanje 2 znaka.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Prezime <span class="req">*</span></label>
+                            <input type="text" class="form-control" id="lastName" required minlength="2" maxlength="255">
+                            <div class="invalid-feedback">Prezime mora imati najmanje 2 znaka.</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row form-row--single">
+                        <div class="form-group">
+                            <label for="address">Adresa</label>
+                            <input type="text" class="form-control" id="address" maxlength="500">
+                        </div>
+                    </div>
+
+                    <p class="form-section-label">Osobni podaci</p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="partnerNumber">Partner broj <span class="req">*</span></label>
+                            <input type="text" class="form-control" id="partnerNumber" required pattern="\d{20}" maxlength="20" placeholder="20 znamenki">
+                            <div class="invalid-feedback">Mora sadržavati točno 20 znamenki.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="croatianPIN">OIB</label>
+                            <input type="text" class="form-control" id="croatianPIN" maxlength="11" placeholder="neobavezno, 11 znamenki">
+                            <div class="invalid-feedback">OIB mora imati točno 11 znamenki.</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row form-row--triple">
+                        <div class="form-group">
+                            <label for="partnerTypeId">Vrsta partnera <span class="req">*</span></label>
+                            <select class="form-control" id="partnerTypeId" required>
+                                <option value="" disabled selected>Odaberite...</option>
+                                <option value="1">Privatna osoba</option>
+                                <option value="2">Pravna osoba</option>
+                            </select>
+                            <div class="invalid-feedback">Odaberite vrstu partnera.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="gender">Spol <span class="req">*</span></label>
+                            <select class="form-control" id="gender" required>
+                                <option value="" disabled selected>Odaberite...</option>
+                                <option value="M">M</option>
+                                <option value="F">F</option>
+                                <option value="N">N</option>
+                            </select>
+                            <div class="invalid-feedback">Odaberite spol.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="isForeign">Strani partner <span class="req">*</span></label>
+                            <select class="form-control" id="isForeign" required>
+                                <option value="" disabled selected>Odaberite...</option>
+                                <option value="false">Ne</option>
+                                <option value="true">Da</option>
+                            </select>
+                            <div class="invalid-feedback">Odaberite jednu od opcija.</div>
+                        </div>
+                    </div>
+
+                    <p class="form-section-label">Ostali podaci</p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="createByUser">Email unositelja <span class="req">*</span></label>
+                            <input type="email" class="form-control" id="createByUser" required maxlength="255" placeholder="ime@tvrtka.hr">
+                            <div class="invalid-feedback">Unesite ispravnu email adresu.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="externalCode">Eksterni kod</label>
+                            <input type="text" class="form-control" id="externalCode" maxlength="20" placeholder="neobavezno, 10–20 znakova">
+                            <div class="invalid-feedback">Mora imati između 10 i 20 znakova.</div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-submit">Spremi partnera</button>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ===================== MODAL: PARTNER DETAIL ===================== -->
+    <div class="modal fade" id="partnerDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content app-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="partnerDetailTitle">Detalji partnera</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="partnerDetailBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== MODAL: NEW POLICY DIALOG ===================== -->
+    <div class="modal fade" id="policyDialog" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content app-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title">Unos police</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="policyAlert"></div>
+                    <form id="policyForm" novalidate>
+                        <div class="form-group">
+                            <label for="policyPartnerId">Partner <span class="req">*</span></label>
+                            <select class="form-control" id="policyPartnerId" required>
+                                <option value="" disabled selected>Odaberite partnera...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="policyNumber">Broj police <span class="req">*</span></label>
+                            <input type="text" class="form-control" id="policyNumber" required minlength="10" maxlength="15" placeholder="10–15 znakova">
+                            <div class="invalid-feedback">Mora imati između 10 i 15 znakova.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="policyAmount">Iznos police <span class="req">*</span></label>
+                            <input type="number" class="form-control" id="policyAmount" required min="0.01" step="0.01" placeholder="0,00">
+                            <div class="invalid-feedback">Unesite iznos veći od 0.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-submit">Spremi policu</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"
+            integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+
+    <script src="js/api.js"></script>
+    <script src="js/signalr-client.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
