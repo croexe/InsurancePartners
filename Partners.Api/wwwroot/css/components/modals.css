@@ -1,0 +1,92 @@
+﻿.app-modal {
+    border: none;
+    border-radius: 10px;
+    box-shadow: var(--shadow-md);
+}
+
+    .app-modal .modal-header {
+        border-bottom: 1px solid var(--line);
+        padding: 20px 24px;
+    }
+
+    .app-modal .modal-title {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 20px;
+        color: var(--navy);
+    }
+
+    .app-modal .modal-body {
+        padding: 24px;
+    }
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    row-gap: 12px;
+    column-gap: 16px;
+    font-size: 14px;
+}
+
+    .detail-grid dt {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--slate);
+        font-weight: 500;
+        align-self: center;
+    }
+
+    .detail-grid dd {
+        margin: 0;
+        color: var(--navy);
+        align-self: center;
+    }
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-pill--flagged {
+    background: var(--amber-soft);
+    color: var(--amber);
+}
+
+.status-pill--clear {
+    background: var(--paper);
+    color: var(--slate);
+}
+
+.policy-table {
+    width: 100%;
+    font-size: 13px;
+    margin-top: 6px;
+}
+
+    .policy-table th {
+        text-align: left;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--slate);
+        padding: 8px 0;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .policy-table td {
+        padding: 9px 0;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .policy-table .amount {
+        font-family: var(--font-mono);
+        text-align: right;
+    }

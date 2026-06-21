@@ -1,0 +1,28 @@
+﻿@media (max-width: 720px) {
+    .form-row,
+    .form-row--triple {
+        grid-template-columns: 1fr;
+    }
+
+    .view-title {
+        font-size: 26px;
+    }
+
+    .card-panel--form {
+        padding: 24px 20px;
+    }
+
+    .data-table {
+        font-size: 13px;
+    }
+}
+
+/* =========================================================
+   Reduced motion
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+    .newly-added-row,
+    .flag-badge.pulse {
+        animation: none;
+    }
+}

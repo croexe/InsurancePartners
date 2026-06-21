@@ -1,0 +1,10 @@
+﻿* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--paper);
+    font-family: var(--font-body);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+}

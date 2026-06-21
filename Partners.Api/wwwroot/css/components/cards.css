@@ -1,0 +1,11 @@
+﻿.card-panel {
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.card-panel--form {
+    padding: 32px 36px 28px;
+}

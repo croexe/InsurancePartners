@@ -1,0 +1,36 @@
+﻿.page {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+}
+
+.view-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin: 0 0 4px;
+}
+
+.view-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 32px;
+    color: var(--navy);
+    margin: 0;
+}
+
+.view-actions {
+    display: flex;
+    gap: 10px;
+}

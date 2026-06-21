@@ -1,0 +1,87 @@
+﻿.form-section-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin: 28px 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+}
+
+    .form-section-label:first-child {
+        margin-top: 0;
+    }
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 4px;
+}
+
+.form-row--single {
+    grid-template-columns: 1fr;
+}
+
+.form-row--triple {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 6px;
+}
+
+.req {
+    color: var(--red);
+}
+
+.form-control {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--navy);
+    background-color: #fff;
+}
+
+select.form-control {
+    height: 42px;
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: 42px;
+}
+
+.form-control:focus {
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(24, 35, 63, 0.1);
+}
+
+.form-control::placeholder {
+    color: var(--slate-light);
+    font-size: 13px;
+}
+
+.was-validated .form-control:invalid {
+    border-color: var(--red);
+}
+
+/* Neobavezna polja (OIB, eksterni kod) ne trebaju zeleni "valid" highlight
+   kad su prazna - Bootstrap ih po defaultu boji zeleno cim su tehnicki
+   validna (prazno + nije required = valid po HTML5 standardu) */
+.was-validated #croatianPIN:valid,
+.was-validated #externalCode:valid,
+.was-validated #address:valid {
+    border-color: var(--line);
+    background-image: none;
+    padding-right: 12px;
+}
+
+.invalid-feedback {
+    font-size: 12px;
+    color: var(--red);
+}

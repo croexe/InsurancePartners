@@ -1,0 +1,16 @@
+﻿.alert {
+    border-radius: var(--radius);
+    border: none;
+    font-size: 14px;
+    padding: 13px 16px;
+}
+
+.alert-danger {
+    background-color: var(--red-soft);
+    color: var(--red);
+}
+
+.alert-success {
+    background-color: var(--green-soft);
+    color: var(--green);
+}
