@@ -2,6 +2,7 @@
 using Partners.Core.DTOs.Requests;
 using Partners.Core.DTOs.Responses;
 using Partners.Core.Models;
+using Partners.Core.Models.Enums;
 using Partners.Core.Models.Rules.Partner;
 using Partners.Core.Results;
 using Partners.Core.Validators;
@@ -37,7 +38,7 @@ namespace Partners.Core.Services
                     FullName = $"{partner.FirstName} {partner.LastName}",
                     PartnerNumber = partner.PartnerNumber,
                     CroatianPIN = partner.CroatianPIN,
-                    PartnerTypeName = partner.PartnerTypeId.ToString(),
+                    PartnerTypeName = SetPartnerType(partner.PartnerTypeId),
                     CreatedAtUtc = partner.CreatedAtUtc,
                     IsForeign = partner.IsForeign,
                     Gender = partner.Gender.ToString(),
@@ -77,7 +78,7 @@ namespace Partners.Core.Services
                 Address = partner.Address,
                 PartnerNumber = partner.PartnerNumber,
                 CroatianPIN = partner.CroatianPIN,
-                PartnerTypeName = partner.PartnerTypeId.ToString(),
+                PartnerTypeName = SetPartnerType(partner.PartnerTypeId),
                 CreatedAtUtc = partner.CreatedAtUtc,
                 CreateByUser = partner.CreateByUser,
                 IsForeign = partner.IsForeign,
@@ -155,5 +156,8 @@ namespace Partners.Core.Services
                 ? (summary.PolicyCount, summary.TotalAmount)
                 : (0, 0m);
         }
+
+        private static string SetPartnerType(PartnerType partnerType) =>
+            partnerType == PartnerType.Personal ? "Privatna osoba" : "Pravna osoba";
     }
 }
