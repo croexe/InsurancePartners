@@ -50,7 +50,8 @@ app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 
 app.UseAuthorization();
-
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.MapControllers();
 
 app.MapHub<PartnerHub>("/hubs/partners");
