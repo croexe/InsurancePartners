@@ -55,7 +55,9 @@
     background: var(--amber-soft);
     color: var(--amber);
     font-weight: 700;
-    font-size: 12px;
+    font-size: 14px;
+    line-height: 1;
+    padding-top: 4px;
     margin-right: 8px;
     flex-shrink: 0;
 }
