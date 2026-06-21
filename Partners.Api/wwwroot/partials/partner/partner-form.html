@@ -1,0 +1,102 @@
+﻿<section id="view-partner-form" class="view d-none">
+    <div class="view-header">
+        <div>
+            <p class="eyebrow">Novi unos</p>
+            <h1 class="view-title">Novi partner</h1>
+        </div>
+        <div class="view-actions">
+            <button type="button" class="btn btn-ghost" id="btnBackToListFromForm">
+                ← Natrag na listu
+            </button>
+        </div>
+    </div>
+
+    <div id="formAlert"></div>
+
+    <div class="card-panel card-panel--form">
+        <form id="partnerForm" novalidate>
+
+            <p class="form-section-label">Osobni podaci</p>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">Ime <span class="req">*</span></label>
+                    <input type="text" class="form-control" id="firstName" required minlength="2" maxlength="255">
+                    <div class="invalid-feedback">Ime mora imati najmanje 2 znaka.</div>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Prezime <span class="req">*</span></label>
+                    <input type="text" class="form-control" id="lastName" required minlength="2" maxlength="255">
+                    <div class="invalid-feedback">Prezime mora imati najmanje 2 znaka.</div>
+                </div>
+            </div>
+
+            <div class="form-row form-row--single">
+                <div class="form-group">
+                    <label for="address">Adresa</label>
+                    <input type="text" class="form-control" id="address" maxlength="500">
+                </div>
+            </div>
+
+            <p class="form-section-label">Identifikacijski podaci</p>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="partnerNumber">Partner broj <span class="req">*</span></label>
+                    <input type="text" class="form-control" id="partnerNumber" required pattern="\d{20}" maxlength="20" placeholder="20 znamenki">
+                    <div class="invalid-feedback">Mora sadržavati točno 20 znamenki.</div>
+                </div>
+                <div class="form-group">
+                    <label for="croatianPIN">OIB</label>
+                    <input type="text" class="form-control" id="croatianPIN" maxlength="11" placeholder="neobavezno, 11 znamenki">
+                    <div class="invalid-feedback">OIB mora imati točno 11 znamenki.</div>
+                </div>
+            </div>
+
+            <div class="form-row form-row--triple">
+                <div class="form-group">
+                    <label for="partnerTypeId">Vrsta partnera <span class="req">*</span></label>
+                    <select class="form-control" id="partnerTypeId" required>
+                        <option value="" disabled selected>Odaberite...</option>
+                        <option value="1">Privatna osoba</option>
+                        <option value="2">Pravna osoba</option>
+                    </select>
+                    <div class="invalid-feedback">Odaberite vrstu partnera.</div>
+                </div>
+                <div class="form-group">
+                    <label for="gender">Spol <span class="req">*</span></label>
+                    <select class="form-control" id="gender" required>
+                        <option value="" disabled selected>Odaberite...</option>
+                        <option value="M">M</option>
+                        <option value="F">F</option>
+                        <option value="N">N</option>
+                    </select>
+                    <div class="invalid-feedback">Odaberite spol.</div>
+                </div>
+                <div class="form-group">
+                    <label for="isForeign">Strani partner <span class="req">*</span></label>
+                    <select class="form-control" id="isForeign" required>
+                        <option value="" disabled selected>Odaberite...</option>
+                        <option value="false">Ne</option>
+                        <option value="true">Da</option>
+                    </select>
+                    <div class="invalid-feedback">Odaberite jednu od opcija.</div>
+                </div>
+            </div>
+
+            <p class="form-section-label">Administrativni podaci</p>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="createByUser">Email unositelja <span class="req">*</span></label>
+                    <input type="email" class="form-control" id="createByUser" required maxlength="255" placeholder="ime@tvrtka.hr">
+                    <div class="invalid-feedback">Unesite ispravnu email adresu.</div>
+                </div>
+                <div class="form-group">
+                    <label for="externalCode">Eksterni kod</label>
+                    <input type="text" class="form-control" id="externalCode" maxlength="20" placeholder="neobavezno, 10–20 znakova">
+                    <div class="invalid-feedback">Mora imati između 10 i 20 znakova.</div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-submit">Spremi partnera</button>
+        </form>
+    </div>
+</section>

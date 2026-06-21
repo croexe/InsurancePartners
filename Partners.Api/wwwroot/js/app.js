@@ -1,4 +1,10 @@
-﻿let currentPartners = [];
+﻿// app.js - prikaz, renderiranje, validacija formi, modali, SignalR integracija.
+// NAPOMENA: sve funkcije koje vezuju event listenere na DOM elemente su
+// zapakirane u initApp(), koja se poziva TEK nakon sto su HTML partiali
+// (iz partials/ foldera) ucitani u stranicu - vidi index.html i
+// partials-loader.js.
+
+let currentPartners = [];
 
 // ===================== VIEW SWITCHING =====================
 
@@ -6,15 +12,6 @@ function showView(viewId) {
     document.querySelectorAll(".view").forEach((el) => el.classList.add("d-none"));
     document.getElementById(viewId).classList.remove("d-none");
 }
-
-document.getElementById("btnGoToPartnerForm").addEventListener("click", () => {
-    resetPartnerForm();
-    showView("view-partner-form");
-});
-
-document.getElementById("btnBackToListFromForm").addEventListener("click", () => {
-    showView("view-list");
-});
 
 // ===================== ALERT HELPERS =====================
 
@@ -168,51 +165,7 @@ function validateOptionalPartnerFields() {
     return allValid;
 }
 
-document.getElementById("partnerForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-    const form = e.target;
-
-    const optionalFieldsValid = validateOptionalPartnerFields();
-
-    if (!form.checkValidity() || !optionalFieldsValid) {
-        form.classList.add("was-validated");
-        return;
-    }
-
-    const request = {
-        firstName: document.getElementById("firstName").value.trim(),
-        lastName: document.getElementById("lastName").value.trim(),
-        address: document.getElementById("address").value.trim() || null,
-        partnerNumber: document.getElementById("partnerNumber").value.trim(),
-        croatianPIN: document.getElementById("croatianPIN").value.trim() || null,
-        partnerTypeId: Number(document.getElementById("partnerTypeId").value),
-        createByUser: document.getElementById("createByUser").value.trim(),
-        isForeign: document.getElementById("isForeign").value === "true",
-        externalCode: document.getElementById("externalCode").value.trim() || null,
-        gender: document.getElementById("gender").value
-    };
-
-    clearAlert("formAlert");
-
-    try {
-        const result = await api.createPartner(request);
-        await loadPartners();
-        showView("view-list");
-        highlightNewPartnerRow(result.id);
-    } catch (err) {
-        showAlert("formAlert", (err.errors || ["Greška kod spremanja partnera."]).join("<br>"));
-    }
-});
-
-// ===================== POLICY DIALOG =====================
-
-document.getElementById("btnOpenPolicyDialog").addEventListener("click", function () {
-    populatePolicyPartnerDropdown();
-    document.getElementById("policyForm").reset();
-    document.getElementById("policyForm").classList.remove("was-validated");
-    clearAlert("policyAlert");
-    $("#policyDialog").modal("show");
-});
+// ===================== POLICY DIALOG HELPERS =====================
 
 function populatePolicyPartnerDropdown() {
     const select = document.getElementById("policyPartnerId");
@@ -222,44 +175,110 @@ function populatePolicyPartnerDropdown() {
         }).join("");
 }
 
-document.getElementById("policyForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-    const form = e.target;
-
-    if (!form.checkValidity()) {
-        form.classList.add("was-validated");
-        return;
-    }
-
-    const request = {
-        policyNumber: document.getElementById("policyNumber").value.trim(),
-        amount: Number(document.getElementById("policyAmount").value),
-        partnerId: Number(document.getElementById("policyPartnerId").value)
-    };
-
-    clearAlert("policyAlert");
-
-    try {
-        await api.createPolicy(request);
-        $("#policyDialog").modal("hide");
-        await loadPartners();
-    } catch (err) {
-        showAlert("policyAlert", (err.errors || ["Greška kod spremanja police."]).join("<br>"));
-    }
-});
-
 // ===================== SIGNALR - REAL-TIME * AŽURIRANJE =====================
 
-onPartnerFlagChanged(function (data) {
-    const partner = currentPartners.find(function (p) { return p.id === data.partnerId; });
-    if (partner) {
-        partner.isFlagged = data.isFlagged;
-        renderPartnerTable();
-        const badge = document.querySelector('.partner-row[data-id="' + data.partnerId + '"] .flag-badge');
-        if (badge) badge.classList.add("pulse");
-    }
-});
+function wireSignalRListener() {
+    onPartnerFlagChanged(function (data) {
+        const partner = currentPartners.find(function (p) { return p.id === data.partnerId; });
+        if (partner) {
+            partner.isFlagged = data.isFlagged;
+            renderPartnerTable();
+            const badge = document.querySelector('.partner-row[data-id="' + data.partnerId + '"] .flag-badge');
+            if (badge) badge.classList.add("pulse");
+        }
+    });
+}
 
-// ===================== INIT =====================
+// ===================== INIT - vezivanje event listenera na ucitane partiale =====================
 
-loadPartners();
+function initApp() {
+    document.getElementById("btnGoToPartnerForm").addEventListener("click", () => {
+        resetPartnerForm();
+        showView("view-partner-form");
+    });
+
+    document.getElementById("btnBackToListFromForm").addEventListener("click", () => {
+        showView("view-list");
+    });
+
+    document.getElementById("partnerForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const form = e.target;
+
+        const optionalFieldsValid = validateOptionalPartnerFields();
+
+        if (!form.checkValidity() || !optionalFieldsValid) {
+            form.classList.add("was-validated");
+            return;
+        }
+
+        const request = {
+            firstName: document.getElementById("firstName").value.trim(),
+            lastName: document.getElementById("lastName").value.trim(),
+            address: document.getElementById("address").value.trim() || null,
+            partnerNumber: document.getElementById("partnerNumber").value.trim(),
+            croatianPIN: document.getElementById("croatianPIN").value.trim() || null,
+            partnerTypeId: Number(document.getElementById("partnerTypeId").value),
+            createByUser: document.getElementById("createByUser").value.trim(),
+            isForeign: document.getElementById("isForeign").value === "true",
+            externalCode: document.getElementById("externalCode").value.trim() || null,
+            gender: document.getElementById("gender").value
+        };
+
+        clearAlert("formAlert");
+
+        try {
+            const result = await api.createPartner(request);
+            await loadPartners();
+            showView("view-list");
+            highlightNewPartnerRow(result.id);
+        } catch (err) {
+            showAlert("formAlert", (err.errors || ["Greška kod spremanja partnera."]).join("<br>"));
+        }
+    });
+
+    document.getElementById("btnOpenPolicyDialog").addEventListener("click", function () {
+        populatePolicyPartnerDropdown();
+        document.getElementById("policyForm").reset();
+        document.getElementById("policyForm").classList.remove("was-validated");
+        clearAlert("policyAlert");
+        $("#policyDialog").modal("show");
+    });
+
+    document.getElementById("policyForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const form = e.target;
+
+        if (!form.checkValidity()) {
+            form.classList.add("was-validated");
+            return;
+        }
+
+        const request = {
+            policyNumber: document.getElementById("policyNumber").value.trim(),
+            amount: Number(document.getElementById("policyAmount").value),
+            partnerId: Number(document.getElementById("policyPartnerId").value)
+        };
+
+        clearAlert("policyAlert");
+
+        try {
+            await api.createPolicy(request);
+            $("#policyDialog").modal("hide");
+            await loadPartners();
+        } catch (err) {
+            showAlert("policyAlert", (err.errors || ["Greška kod spremanja police."]).join("<br>"));
+        }
+    });
+
+    wireSignalRListener();
+
+    loadPartners();
+}
+
+// Pokreni: prvo ucitaj partiale, zatim inicijaliziraj event listenere i podatke
+loadAllPartials()
+    .then(initApp)
+    .catch(function (err) {
+        console.error("Greška kod učitavanja partiala:", err);
+    });
