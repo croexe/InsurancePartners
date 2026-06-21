@@ -1,12 +1,12 @@
 /* ===========================================================
    InsurancePartners - skripta za kreiranje baze i tablica
-   F5 za izvrsavanje
+   Pokreni cijelu skriptu u SSMS (New Query), F5 za izvrsavanje
    =========================================================== */
 
 -- 1. Kreiranje baze (ako ne postoji)
 IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'WienerPartners')
 BEGIN
-    CREATE DATABASE WienerPartners;
+    CREATE DATABASE InsurancePartners;
 END
 GO
 
@@ -54,10 +54,20 @@ CREATE TABLE dbo.Partner
     -- CreateByUser: mora sadrzavati '@' (osnovna provjera formata e-maila)
     CONSTRAINT CK_Partner_CreateByUser_Email CHECK (CreateByUser LIKE '%_@__%.__%'),
 
-    -- ExternalCode: jedinstven, ali NULL dozvoljen vise puta
-    CONSTRAINT UQ_Partner_ExternalCode UNIQUE (ExternalCode),
+    -- ExternalCode: ako je upisan, mora imati najmanje 10 znakova (jedinstvenost se
+    -- provodi kroz filtrirani unique indeks ispod, ne kroz standardni UNIQUE constraint)
     CONSTRAINT CK_Partner_ExternalCode_Length CHECK (ExternalCode IS NULL OR LEN(ExternalCode) >= 10)
 );
+GO
+
+-- 3a. Filtrirani unique indeks za ExternalCode.
+-- Standardni UNIQUE constraint u SQL Serveru dozvoljava SAMO JEDAN NULL u koloni -
+-- drugi NULL bi bio tretiran kao duplikat, sto je pogresno za neobavezno polje
+-- gdje vise partnera legitimno nema ExternalCode. Filtrirani indeks (WHERE ExternalCode
+-- IS NOT NULL) provjerava jedinstvenost SAMO kad je vrijednost upisana.
+CREATE UNIQUE INDEX UQ_Partner_ExternalCode
+    ON dbo.Partner (ExternalCode)
+    WHERE ExternalCode IS NOT NULL;
 GO
 
 -- 4. Tablica Policy
