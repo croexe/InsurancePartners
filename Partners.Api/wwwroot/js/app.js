@@ -1,10 +1,4 @@
-﻿// app.js - prikaz, renderiranje, validacija formi, modali, SignalR integracija.
-// NAPOMENA: sve funkcije koje vezuju event listenere na DOM elemente su
-// zapakirane u initApp(), koja se poziva TEK nakon sto su HTML partiali
-// (iz partials/ foldera) ucitani u stranicu - vidi index.html i
-// partials-loader.js.
-
-let currentPartners = [];
+﻿let currentPartners = [];
 
 // ===================== VIEW SWITCHING =====================
 
@@ -138,9 +132,6 @@ function resetPartnerForm() {
     clearAlert("formAlert");
 }
 
-// Validira OIB i Eksterni kod SAMO ako su popunjeni - ako su prazna, ne smatraju se
-// nevazecima jer su neobavezna polja. Koristi setCustomValidity da se uklopi u
-// postojeci Bootstrap "was-validated" / invalid-feedback prikaz gresaka.
 function validateOptionalPartnerFields() {
     let allValid = true;
 
@@ -276,7 +267,6 @@ function initApp() {
     loadPartners();
 }
 
-// Pokreni: prvo ucitaj partiale, zatim inicijaliziraj event listenere i podatke
 loadAllPartials()
     .then(initApp)
     .catch(function (err) {
