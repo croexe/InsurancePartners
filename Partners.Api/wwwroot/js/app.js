@@ -102,7 +102,7 @@ async function openPartnerDetail(id) {
             statusPillHtml +
             '<dl class="detail-grid">' +
             "<dt>Adresa</dt><dd>" + escapeHtml(partner.address || "—") + "</dd>" +
-            "<dt>Partner broj</dt><dd>" + escapeHtml(partner.partnerNumber) + "</dd>" +
+            "<dt>Broj partnera</dt><dd>" + escapeHtml(partner.partnerNumber) + "</dd>" +
             "<dt>OIB</dt><dd>" + escapeHtml(partner.croatianPIN || "—") + "</dd>" +
             "<dt>Vrsta</dt><dd>" + escapeHtml(partner.partnerTypeName) + "</dd>" +
             "<dt>Datum unosa</dt><dd>" + new Date(partner.createdAtUtc).toLocaleString("hr-HR") + "</dd>" +
