@@ -23,7 +23,7 @@ async function apiRequest(method, path, body) {
 
 function extractErrorMessages(data) {
     if (!data) {
-        return ["Dogodila se nepoznata greška."];
+        return ["Unknown error occured."];
     }
 
     if (Array.isArray(data.errors)) {
@@ -38,7 +38,7 @@ function extractErrorMessages(data) {
         return [data.message];
     }
 
-    return ["Dogodila se nepoznata greška."];
+    return ["Unknown error occured."];
 }
 
 const api = {
