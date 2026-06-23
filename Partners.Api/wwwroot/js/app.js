@@ -259,6 +259,14 @@ function wireSignalRListener() {
 // ===================== INIT - vezivanje event listenera na ucitane partiale =====================
 
 function initApp() {
+    $("#partnerDetailModal").on("hide.bs.modal", function () {
+        document.activeElement.blur();
+    });
+
+    $("#policyDialog").on("hide.bs.modal", function () {
+        document.activeElement.blur();
+    });
+
     document.getElementById("btnGoToPartnerForm").addEventListener("click", () => {
         resetPartnerForm();
         showView("view-partner-form");
