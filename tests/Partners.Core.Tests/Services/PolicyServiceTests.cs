@@ -34,11 +34,11 @@ public class PolicyServiceTests
             .Setup(r => r.GetPartnerByIdAsync(1))
             .ReturnsAsync((Partner?)null);
 
-        var result = await _service.CreateAsync(ValidRequest());
+        var result = await _service.CreatePolicyAsync(ValidRequest());
 
         result.Success.Should().BeFalse();
         result.Errors.Should().ContainSingle(e => e.Contains("1"));
-        _policyRepoMock.Verify(r => r.CreateAsync(It.IsAny<Policy>()), Times.Never);
+        _policyRepoMock.Verify(r => r.CreatePolicyAsync(It.IsAny<Policy>()), Times.Never);
     }
 
     [Fact]
@@ -49,7 +49,7 @@ public class PolicyServiceTests
             .ReturnsAsync(new Partner { Id = 1 });
 
         _policyRepoMock
-            .Setup(r => r.CreateAsync(It.IsAny<Policy>()))
+            .Setup(r => r.CreatePolicyAsync(It.IsAny<Policy>()))
             .ReturnsAsync(10);
 
         _policyRepoMock
@@ -60,7 +60,7 @@ public class PolicyServiceTests
             .Setup(n => n.NotifyPartnerFlagChangedAsync(It.IsAny<int>(), It.IsAny<bool>()))
             .Returns(Task.CompletedTask);
 
-        var result = await _service.CreateAsync(ValidRequest());
+        var result = await _service.CreatePolicyAsync(ValidRequest());
 
         result.Success.Should().BeTrue();
         result.Policy.Should().NotBeNull();
@@ -76,7 +76,7 @@ public class PolicyServiceTests
             .ReturnsAsync(new Partner { Id = 1 });
 
         _policyRepoMock
-            .Setup(r => r.CreateAsync(It.IsAny<Policy>()))
+            .Setup(r => r.CreatePolicyAsync(It.IsAny<Policy>()))
             .ReturnsAsync(1);
 
         _policyRepoMock
@@ -87,7 +87,7 @@ public class PolicyServiceTests
             .Setup(n => n.NotifyPartnerFlagChangedAsync(It.IsAny<int>(), It.IsAny<bool>()))
             .Returns(Task.CompletedTask);
 
-        await _service.CreateAsync(ValidRequest());
+        await _service.CreatePolicyAsync(ValidRequest());
 
         _notifierMock.Verify(n => n.NotifyPartnerFlagChangedAsync(1, It.IsAny<bool>()), Times.Once);
     }

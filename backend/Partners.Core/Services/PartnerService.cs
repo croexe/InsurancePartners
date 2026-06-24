@@ -37,7 +37,7 @@ public class PartnerService : IPartnerService
         });
     }
 
-    public async Task<PartnerDetailResponse?> GetByIdAsync(int id)
+    public async Task<PartnerDetailResponse?> GetPartnerDetailsByIdAsync(int id)
     {
         var partner = await _partnerRepository.GetPartnerByIdAsync(id);
         if (partner is null)
@@ -45,7 +45,7 @@ public class PartnerService : IPartnerService
             return null;
         }
 
-        var policies = await _policyRepository.GetByPartnerIdAsync(id);
+        var policies = await _policyRepository.GetAllPoliciesByPartnerIdAsync(id);
         var policyResponses = policies
             .Select(p => new PolicyResponse
             {
@@ -77,7 +77,7 @@ public class PartnerService : IPartnerService
         };
     }
 
-    public async Task<PartnerServiceResult> CreateAsync(CreatePartnerRequest request)
+    public async Task<PartnerServiceResult> CreatePartnerAsync(CreatePartnerRequest request)
     {
         if (!string.IsNullOrWhiteSpace(request.ExternalCode))
         {

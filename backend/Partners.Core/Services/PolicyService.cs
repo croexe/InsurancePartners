@@ -20,7 +20,7 @@ public class PolicyService : IPolicyService
         _partnerNotifier = partnerNotifier;
     }
 
-    public async Task<PolicyServiceResult> CreateAsync(CreatePolicyRequest request)
+    public async Task<PolicyServiceResult> CreatePolicyAsync(CreatePolicyRequest request)
     {
         var partner = await _partnerRepository.GetPartnerByIdAsync(request.PartnerId!.Value);
         if (partner is null)
@@ -35,7 +35,7 @@ public class PolicyService : IPolicyService
             PartnerId = request.PartnerId!.Value
         };
 
-        var newId = await _policyRepository.CreateAsync(policy);
+        var newId = await _policyRepository.CreatePolicyAsync(policy);
 
         var response = new PolicyResponse
         {

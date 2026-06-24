@@ -22,7 +22,7 @@ public static class PartnerEndpoints
 
         group.MapGet("/{id:int}", async (int id, IPartnerService service) =>
         {
-            var partner = await service.GetByIdAsync(id);
+            var partner = await service.GetPartnerDetailsByIdAsync(id);
             return partner is null
                 ? Results.NotFound(new { message = $"Partner with Id '{id}' was not found." })
                 : Results.Ok(partner);
@@ -32,7 +32,7 @@ public static class PartnerEndpoints
 
         group.MapPost("/", async (CreatePartnerRequest request, IPartnerService service) =>
         {
-            var result = await service.CreateAsync(request);
+            var result = await service.CreatePartnerAsync(request);
             return result.Success
                 ? Results.Created($"api/partners/{result.PartnerId}", new { id = result.PartnerId })
                 : Results.BadRequest(new { errors = result.Errors });

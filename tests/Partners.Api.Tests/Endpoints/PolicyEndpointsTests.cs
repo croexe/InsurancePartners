@@ -33,7 +33,7 @@ public class PolicyEndpointsTests : IClassFixture<CustomWebApplicationFactory>
     {
         var token = await _factory.GetValidTokenAsync();
         _factory.PolicyServiceMock
-            .Setup(s => s.CreateAsync(It.IsAny<CreatePolicyRequest>()))
+            .Setup(s => s.CreatePolicyAsync(It.IsAny<CreatePolicyRequest>()))
             .ReturnsAsync(PolicyServiceResult.Ok(new PolicyResponse
             {
                 Id = 1,

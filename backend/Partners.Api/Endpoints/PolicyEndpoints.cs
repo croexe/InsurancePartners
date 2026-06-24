@@ -15,7 +15,7 @@ public static class PolicyEndpoints
 
         group.MapPost("/", async (CreatePolicyRequest request, IPolicyService service) =>
         {
-            var result = await service.CreateAsync(request);
+            var result = await service.CreatePolicyAsync(request);
             return result.Success
                 ? Results.Created(string.Empty, result.Policy)
                 : Results.BadRequest(new { errors = result.Errors });

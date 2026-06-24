@@ -40,7 +40,7 @@ public class PartnerServiceTests
             .Setup(r => r.ExternalCodeExistsAsync("EXT123456789"))
             .ReturnsAsync(true);
 
-        var result = await _service.CreateAsync(request);
+        var result = await _service.CreatePartnerAsync(request);
 
         result.Success.Should().BeFalse();
         result.Errors.Should().ContainSingle(e => e.Contains("EXT123456789"));
@@ -54,7 +54,7 @@ public class PartnerServiceTests
             .Setup(r => r.CreatePartnerAsync(It.IsAny<Partner>()))
             .ReturnsAsync(42);
 
-        var result = await _service.CreateAsync(ValidRequest());
+        var result = await _service.CreatePartnerAsync(ValidRequest());
 
         result.Success.Should().BeTrue();
         result.PartnerId.Should().Be(42);
@@ -74,7 +74,7 @@ public class PartnerServiceTests
             .Setup(r => r.CreatePartnerAsync(It.IsAny<Partner>()))
             .ReturnsAsync(1);
 
-        var result = await _service.CreateAsync(request);
+        var result = await _service.CreatePartnerAsync(request);
 
         result.Success.Should().BeTrue();
     }
@@ -86,7 +86,7 @@ public class PartnerServiceTests
             .Setup(r => r.GetPartnerByIdAsync(99))
             .ReturnsAsync((Partner?)null);
 
-        var result = await _service.GetByIdAsync(99);
+        var result = await _service.GetPartnerDetailsByIdAsync(99);
 
         result.Should().BeNull();
     }

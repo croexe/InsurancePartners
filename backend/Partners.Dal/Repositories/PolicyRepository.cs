@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Partners.Core.Contracts;
 using Partners.Core.DTOs.Responses;
 using Partners.Core.Models;
@@ -15,7 +15,7 @@ namespace Partners.Dal.Repositories
             _dbConnectionFactory = dbConnectionFactory;
         }
 
-        public async Task<IEnumerable<Policy>> GetByPartnerIdAsync(int partnerId)
+        public async Task<IEnumerable<Policy>> GetAllPoliciesByPartnerIdAsync(int partnerId)
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 
@@ -25,7 +25,7 @@ namespace Partners.Dal.Repositories
                 commandType: System.Data.CommandType.StoredProcedure);
         }
 
-        public async Task<int> CreateAsync(Policy policy)
+        public async Task<int> CreatePolicyAsync(Policy policy)
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 
@@ -49,17 +49,6 @@ namespace Partners.Dal.Repositories
                 "dbo.GetPolicySummaryByPartnerId",
                 new { PartnerId = partnerId },
                 commandType: System.Data.CommandType.StoredProcedure);
-        }
-
-        public async Task<IReadOnlyDictionary<int, PartnerPolicySummaryResponse>> GetSummariesForPartnerAsync()
-        {
-            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
-
-            var rows = await connection.QueryAsync<PartnerPolicySummaryResponse>(
-                "dbo.GetPartnerPolicySummaries",
-                commandType: System.Data.CommandType.StoredProcedure);
-
-            return rows.ToDictionary(r => r.PartnerId, r => r);
         }
     }
 }

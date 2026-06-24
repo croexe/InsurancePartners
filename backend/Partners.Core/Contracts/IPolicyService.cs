@@ -5,6 +5,6 @@ namespace Partners.Core.Contracts
 {
     public interface IPolicyService
     {
-        Task<PolicyServiceResult> CreateAsync(CreatePolicyRequest request);
+        Task<PolicyServiceResult> CreatePolicyAsync(CreatePolicyRequest request);
     }
 }
