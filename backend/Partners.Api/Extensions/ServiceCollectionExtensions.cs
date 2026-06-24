@@ -1,4 +1,8 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Partners.Api.ErrorHandling;
 using Partners.Api.Notifications;
 using Partners.Core.Contracts;
@@ -8,6 +12,7 @@ using Partners.Dal.Database;
 using Partners.Dal.Repositories;
 using Serilog;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
+using System.Text;
 using System.Text.Json.Serialization;
 
 namespace Partners.Api.Extensions;
@@ -41,6 +46,41 @@ internal static class ServiceCollectionExtensions
         });
 
         services.AddSignalR();
+
+        services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(configuration.GetConnectionString("InsurancePartnersDb")));
+
+        services.AddIdentity<IdentityUser, IdentityRole>(options =>
+        {
+            options.Password.RequiredLength = 8;
+            options.Password.RequireNonAlphanumeric = true;
+            options.Password.RequireDigit = true;
+            options.Password.RequireUppercase = true;
+        })
+        .AddEntityFrameworkStores<ApplicationDbContext>()
+        .AddDefaultTokenProviders();
+
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = configuration["Jwt:Issuer"],
+                ValidAudience = configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]!))
+            };
+        });
+
+        services.AddAuthorization();
 
         services.AddSingleton<IDbConnectionFactory>(_ =>
             new SqlConnectionFactory(

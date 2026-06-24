@@ -5,5 +5,7 @@ builder.ApplyWienConfiguration();
 
 var app = builder.Build();
 
+await app.ApplyWienMigrationsAndSeedAsync();
+
 app.ApplyWienWebApplicationConfiguration();
 app.Run();

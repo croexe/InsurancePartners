@@ -10,7 +10,8 @@ public static class PartnerEndpoints
     public static IEndpointRouteBuilder MapPartnerEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("api/partners")
-            .AddFluentValidationAutoValidation();
+            .AddFluentValidationAutoValidation()
+            .RequireAuthorization(policy => policy.RequireRole("PolicyManager"));
 
         group.MapGet("/", async (IPartnerService service) =>
         {

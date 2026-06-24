@@ -10,7 +10,8 @@ public static class PolicyEndpoints
     public static IEndpointRouteBuilder MapPolicyEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("api/policies")
-            .AddFluentValidationAutoValidation();
+            .AddFluentValidationAutoValidation()
+            .RequireAuthorization(policy => policy.RequireRole("PolicyManager"));
 
         group.MapPost("/", async (CreatePolicyRequest request, IPolicyService service) =>
         {
