@@ -39,7 +39,7 @@ public class PartnerService : IPartnerService
 
     public async Task<PartnerDetailResponse?> GetByIdAsync(int id)
     {
-        var partner = await _partnerRepository.GetByIdAsync(id);
+        var partner = await _partnerRepository.GetPartnerByIdAsync(id);
         if (partner is null)
         {
             return null;
@@ -102,7 +102,7 @@ public class PartnerService : IPartnerService
             Gender = request.Gender!.Value
         };
 
-        var newId = await _partnerRepository.CreateAsync(partner);
+        var newId = await _partnerRepository.CreatePartnerAsync(partner);
 
         return PartnerServiceResult.Ok(newId);
     }

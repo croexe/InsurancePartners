@@ -31,7 +31,7 @@ public class PolicyServiceTests
     public async Task CreateAsync_PartnerDoesNotExist_ReturnsFail()
     {
         _partnerRepoMock
-            .Setup(r => r.GetByIdAsync(1))
+            .Setup(r => r.GetPartnerByIdAsync(1))
             .ReturnsAsync((Partner?)null);
 
         var result = await _service.CreateAsync(ValidRequest());
@@ -45,7 +45,7 @@ public class PolicyServiceTests
     public async Task CreateAsync_ValidRequest_ReturnsOkWithPolicyResponse()
     {
         _partnerRepoMock
-            .Setup(r => r.GetByIdAsync(1))
+            .Setup(r => r.GetPartnerByIdAsync(1))
             .ReturnsAsync(new Partner { Id = 1 });
 
         _policyRepoMock
@@ -72,7 +72,7 @@ public class PolicyServiceTests
     public async Task CreateAsync_ValidRequest_NotifiesSignalR()
     {
         _partnerRepoMock
-            .Setup(r => r.GetByIdAsync(1))
+            .Setup(r => r.GetPartnerByIdAsync(1))
             .ReturnsAsync(new Partner { Id = 1 });
 
         _policyRepoMock

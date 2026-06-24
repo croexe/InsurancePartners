@@ -8,8 +8,8 @@ namespace Partners.Core.Contracts
     public interface IPartnerRepository
     {
         Task<IEnumerable<Partner>> GetAllPartnersAsync();
-        Task<Partner?> GetByIdAsync(int id);
-        Task<int> CreateAsync(Partner partner);
+        Task<Partner?> GetPartnerByIdAsync(int id);
+        Task<int> CreatePartnerAsync(Partner partner);
         Task<bool> ExternalCodeExistsAsync(string externalCode);
     }
 }

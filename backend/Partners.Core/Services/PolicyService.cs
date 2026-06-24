@@ -22,7 +22,7 @@ public class PolicyService : IPolicyService
 
     public async Task<PolicyServiceResult> CreateAsync(CreatePolicyRequest request)
     {
-        var partner = await _partnerRepository.GetByIdAsync(request.PartnerId!.Value);
+        var partner = await _partnerRepository.GetPartnerByIdAsync(request.PartnerId!.Value);
         if (partner is null)
         {
             return PolicyServiceResult.Fail($"Partner with Id '{request.PartnerId}' does not exist.");
