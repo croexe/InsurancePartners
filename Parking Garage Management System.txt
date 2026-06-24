@@ -1,0 +1,162 @@
+Garage
+├── Id
+├── Name
+├── TotalCapacity
+└── CoveredCapacity              -- 85% kapaciteta, 
+
+Floor
+├── Id
+├── FloorNumber
+└── GarageId (FK)
+
+ParkingSpot
+├── Id
+├── FloorId (FK)
+├── SpotNumber
+└── IsCovered
+
+ParkingSession
+├── Id
+├── SpotId (FK)
+├── UserId (FK, nullable)
+├── EntryTimestamp
+├── ExitTimestamp (nullable)
+├── EntryToken                   -- neovisan o fizickom mediju, 
+├── Status                       -- Active | PaidAwaitingExit | Expired | Completed
+└── PaymentId (FK, nullable)
+
+Payment
+├── Id
+├── ParkingSessionId (FK)
+├── Amount
+├── PaidAtTimestamp
+├── PaymentTerminalId (FK)
+├── RainDiscountApplied
+└── GracePeriodExpiresAt         -- PaidAtTimestamp + 10 minuta
+
+PaymentTerminal
+├── Id
+└── FloorId (FK)
+
+User
+├── Id
+├── UserType                     
+├── IdentityClaim
+└── ContractId (FK, nullable)
+
+Contract
+├── Id
+├── UserId (FK)
+├── StartDate
+├── EndDate
+└── BillingTerms
+
+RainLog
+├── Id
+├── GarageId (FK)
+├── StartTimestamp
+└── EndTimestamp (nullable)
+
+MonthlyReportSnapshot
+├── Id
+├── GarageId (FK)
+├── Month
+├── TotalRevenue
+├── OccupancyRate
+└── RainDiscountRevenue
+
+PSEUDOKOD
+FUNCTION ProcessPayment(entryToken):
+
+    session ← FindActiveSessionByEntryToken(entryToken)
+
+    IF session IS NULL:
+        RETURN Error("Session not found.")
+
+    IF session.Status != ACTIVE:
+        RETURN Error("Session has already been paid or has expired.")
+
+    now ← CurrentTimestamp()
+    durationMinutes ← MinutesBetween(session.EntryTimestamp, now)
+
+    spot ← FindParkingSpot(session.SpotId)
+    baseRate ← GetBaseRatePerHour()
+
+    IF spot.IsCovered == FALSE:
+        rainMinutes ← CalculateOverlapWithRainLog(session.EntryTimestamp, now, spot.GarageId)
+        rainPercentage ← rainMinutes / durationMinutes
+
+        IF rainPercentage >= 0.33:
+            baseRate ← baseRate * 0.5
+
+    amount ← CalculateAmount(durationMinutes, baseRate)
+
+    IF session.UserId IS NOT NULL:
+        contract ← FindActiveContract(session.UserId, now)
+        IF contract IS NOT NULL:
+            RETURN ProcessContractBilling(session, amount, contract)
+
+    payment ← CreatePayment(session.Id, amount, now)
+    payment.GracePeriodExpiresAt ← now + 10 MINUTES  
+
+    session.Status ← PAID_AWAITING_EXIT
+    session.PaymentId ← payment.Id
+
+    SaveSession(session)
+    SavePayment(payment)
+
+    RETURN PaymentConfirmation(amount, payment.GracePeriodExpiresAt)
+
+FUNCTION CheckExpiredGracePeriods():
+    expiredSessions ← FindSessionsWhere(
+        Status == PAID_AWAITING_EXIT
+        AND GracePeriodExpiresAt < CurrentTimestamp()
+    )
+
+    FOR EACH session IN expiredSessions:
+        session.Status ← EXPIRED
+        SaveSession(session)
+		
+FUNCTION GetTotalGarageOccupancy(garageId):
+
+    activeSessions ← CountSessionsWhere(
+        GarageId == garageId
+        AND Status IN (ACTIVE, PAID_AWAITING_EXIT)
+    )
+
+    totalCapacity ← GetGarageCapacity(garageId)
+    freeSpots ← totalCapacity - activeSessions
+
+    RETURN { TotalFree: freeSpots, TotalCapacity: totalCapacity }
+
+
+FUNCTION OnSessionStatusChanged(session):
+    occupancy ← GetTotalGarageOccupancy(session.GarageId)
+    PushToDisplay(EntranceDisplay, occupancy)
+	
+FUNCTION GenerateMonthlyReport(garageId, month):
+
+    sessions ← GetCompletedSessions(garageId, month)
+    payments ← GetPaymentsForSessions(sessions)
+
+    totalCapacityMinutes ← GetGarageCapacity(garageId) * MinutesInMonth(month)
+    occupiedMinutes ← Sum(session.DurationMinutes FOR session IN sessions)
+    occupancyRate ← occupiedMinutes / totalCapacityMinutes
+
+    totalRevenue ← Sum(payment.Amount FOR payment IN payments)
+
+    rainDiscountedPayments ← Filter(payments, payment.RainDiscountApplied == TRUE)
+    rainDiscountRevenue ← Sum(payment.Amount FOR payment IN rainDiscountedPayments)
+
+    report ← {
+        GarageId: garageId,
+        Month: month,
+        TotalRevenue: totalRevenue,
+        OccupancyRate: occupancyRate,
+        RainDiscountRevenue: rainDiscountRevenue
+    }
+
+    SaveMonthlyReportSnapshot(report)
+
+    RETURN report
+
