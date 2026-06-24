@@ -1,9 +1,12 @@
-﻿using Partners.Api.ErrorHandling;
+using FluentValidation;
+using Partners.Api.ErrorHandling;
 using Partners.Api.Notifications;
 using Partners.Core.Contracts;
 using Partners.Core.Services;
+using Partners.Core.Validators;
 using Partners.Dal.Database;
 using Partners.Dal.Repositories;
+using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 using System.Text.Json.Serialization;
 
 namespace Partners.Api.Extensions;
@@ -17,9 +20,9 @@ internal static class ServiceCollectionExtensions
     {
         services.AddOpenApi();
 
-        services.AddControllers().AddJsonOptions(options =>
+        services.ConfigureHttpJsonOptions(options =>
         {
-            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
         });
 
         services.AddSignalR();
@@ -33,6 +36,9 @@ internal static class ServiceCollectionExtensions
         services.AddScoped<IPartnerService, PartnerService>();
         services.AddScoped<IPolicyService, PolicyService>();
         services.AddScoped<IPartnerNotifier, SignalRPartnerNotifier>();
+
+        services.AddValidatorsFromAssemblyContaining<CreatePartnerRequestValidator>();
+        services.AddFluentValidationAutoValidation();
 
         services.AddProblemDetails();
         services.AddExceptionHandler<ProblemExceptionHandler>();

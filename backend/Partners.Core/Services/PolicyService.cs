@@ -1,75 +1,57 @@
-﻿using Partners.Core.Contracts;
+using Partners.Core.Contracts;
 using Partners.Core.DTOs.Requests;
 using Partners.Core.DTOs.Responses;
 using Partners.Core.Models;
 using Partners.Core.Models.Rules.Partner;
 using Partners.Core.Results;
 
-namespace Partners.Core.Services
+namespace Partners.Core.Services;
+
+public class PolicyService : IPolicyService
 {
-    public class PolicyService : IPolicyService
+    private readonly IPolicyRepository _policyRepository;
+    private readonly IPartnerRepository _partnerRepository;
+    private readonly IPartnerNotifier _partnerNotifier;
+
+    public PolicyService(IPolicyRepository policyRepository, IPartnerRepository partnerRepository, IPartnerNotifier partnerNotifier)
     {
-        private readonly IPolicyRepository _policyRepository;
-        private readonly IPartnerRepository _partnerRepository;
-        private readonly IPartnerNotifier _partnerNotifier;
+        _policyRepository = policyRepository;
+        _partnerRepository = partnerRepository;
+        _partnerNotifier = partnerNotifier;
+    }
 
-        public PolicyService(IPolicyRepository policyRepository, IPartnerRepository partnerRepository, IPartnerNotifier partnerNotifier)
+    public async Task<PolicyServiceResult> CreateAsync(CreatePolicyRequest request)
+    {
+        var partner = await _partnerRepository.GetByIdAsync(request.PartnerId!.Value);
+        if (partner is null)
         {
-            _policyRepository = policyRepository;
-            _partnerRepository = partnerRepository;
-            _partnerNotifier = partnerNotifier;
+            return PolicyServiceResult.Fail($"Partner with Id '{request.PartnerId}' does not exist.");
         }
 
-        public async Task<PolicyServiceResult> CreateAsync(CreatePolicyRequest request)
+        var policy = new Policy
         {
-            var errors = new List<string>();
+            PolicyNumber = request.PolicyNumber.Trim(),
+            Amount = request.Amount!.Value,
+            PartnerId = request.PartnerId!.Value
+        };
 
-            if (request.Amount is null)
-            {
-                errors.Add("Amount is required.");
-            }
+        var newId = await _policyRepository.CreateAsync(policy);
 
-            if (request.PartnerId is null)
-            {
-                errors.Add("PartnerId is required.");
-            }
+        var response = new PolicyResponse
+        {
+            Id = newId,
+            PolicyNumber = policy.PolicyNumber,
+            Amount = policy.Amount,
+            PartnerId = policy.PartnerId
+        };
 
-            if (errors.Count > 0)
-            {
-                return PolicyServiceResult.Fail(errors.ToArray());
-            }
+        var allPartnerPolicies = await _policyRepository.GetByPartnerIdAsync(policy.PartnerId);
+        var newPolicyCount = allPartnerPolicies.Count();
+        var newTotalAmount = allPartnerPolicies.Sum(p => p.Amount);
+        var isFlagged = PartnerFlagRules.IsFlagged(newPolicyCount, newTotalAmount);
 
-            var partner = await _partnerRepository.GetByIdAsync(request.PartnerId!.Value);
-            if (partner is null)
-            {
-                return PolicyServiceResult.Fail($"Partner with Id '{request.PartnerId}' does not exist.");
-            }
+        await _partnerNotifier.NotifyPartnerFlagChangedAsync(policy.PartnerId, isFlagged);
 
-            var policy = new Policy
-            {
-                PolicyNumber = request.PolicyNumber.Trim(),
-                Amount = request.Amount!.Value,
-                PartnerId = request.PartnerId!.Value
-            };
-
-            var newId = await _policyRepository.CreateAsync(policy);
-
-            var response = new PolicyResponse
-            {
-                Id = newId,
-                PolicyNumber = policy.PolicyNumber,
-                Amount = policy.Amount,
-                PartnerId = policy.PartnerId
-            };
-
-            var allPartnerPolicies = await _policyRepository.GetByPartnerIdAsync(policy.PartnerId);
-            var newPolicyCount = allPartnerPolicies.Count();
-            var newTotalAmount = allPartnerPolicies.Sum(p => p.Amount);
-            var isFlagged = PartnerFlagRules.IsFlagged(newPolicyCount, newTotalAmount);
-
-            await _partnerNotifier.NotifyPartnerFlagChangedAsync(policy.PartnerId, isFlagged);
-
-            return PolicyServiceResult.Ok(response);
-        }
+        return PolicyServiceResult.Ok(response);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Partners.Api.Hubs;
+﻿using Partners.Api.Endpoints;
+using Partners.Api.Hubs;
 
 namespace Partners.Api.Extensions;
 
@@ -19,7 +20,8 @@ internal static class WebApplicationExtensions
 
         app.UseAuthorization();
 
-        app.MapControllers();
+        app.MapPartnerEndpoints();
+        app.MapPolicyEndpoints();
 
         app.MapHub<PartnerHub>("/hubs/partners");
 
