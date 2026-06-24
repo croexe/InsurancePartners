@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using Partners.Core.DTOs.Requests;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -44,5 +45,3 @@ public static class AuthEndpoints
         return app;
     }
 }
-
-public record LoginRequest(string Email, string Password);
