@@ -45,10 +45,8 @@ public class PolicyService : IPolicyService
             PartnerId = policy.PartnerId
         };
 
-        var allPartnerPolicies = await _policyRepository.GetByPartnerIdAsync(policy.PartnerId);
-        var newPolicyCount = allPartnerPolicies.Count();
-        var newTotalAmount = allPartnerPolicies.Sum(p => p.Amount);
-        var isFlagged = PartnerFlagRules.IsFlagged(newPolicyCount, newTotalAmount);
+        var summary = await _policyRepository.GetPolicySummaryByPartnerIdAsync(policy.PartnerId);
+        var isFlagged = PartnerFlagRules.IsFlagged(summary.PolicyCount, summary.TotalAmount);
 
         await _partnerNotifier.NotifyPartnerFlagChangedAsync(policy.PartnerId, isFlagged);
 

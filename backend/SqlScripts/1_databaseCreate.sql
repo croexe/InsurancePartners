@@ -22,6 +22,7 @@ IF OBJECT_ID('dbo.ExternalCodeExists', 'P') IS NOT NULL DROP PROCEDURE dbo.Exter
 IF OBJECT_ID('dbo.GetPoliciesByPartnerId', 'P') IS NOT NULL DROP PROCEDURE dbo.GetPoliciesByPartnerId;
 IF OBJECT_ID('dbo.CreatePolicy', 'P') IS NOT NULL DROP PROCEDURE dbo.CreatePolicy;
 IF OBJECT_ID('dbo.GetPartnerPolicySummaries', 'P') IS NOT NULL DROP PROCEDURE dbo.GetPartnerPolicySummaries;
+IF OBJECT_ID('dbo.GetPolicySummaryByPartnerId', 'P') IS NOT NULL DROP PROCEDURE dbo.GetPolicySummaryByPartnerId;
 IF OBJECT_ID('dbo.Policy', 'U') IS NOT NULL DROP TABLE dbo.Policy;
 IF OBJECT_ID('dbo.Partner', 'U') IS NOT NULL DROP TABLE dbo.Partner;
 GO
@@ -177,6 +178,19 @@ BEGIN
         ISNULL(SUM(Amount), 0) AS TotalAmount
     FROM dbo.Policy
     GROUP BY PartnerId;
+END
+GO
+
+CREATE OR ALTER PROCEDURE dbo.GetPolicySummaryByPartnerId
+    @PartnerId INT
+AS
+BEGIN
+    SELECT
+        @PartnerId             AS PartnerId,
+        COUNT(*)               AS PolicyCount,
+        ISNULL(SUM(Amount), 0) AS TotalAmount
+    FROM dbo.Policy
+    WHERE PartnerId = @PartnerId;
 END
 GO
 
