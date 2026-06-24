@@ -1,4 +1,6 @@
 ﻿function initApp() {
+    document.getElementById("btnLogout").addEventListener("click", () => auth.logout());
+
     $("#partnerDetailModal").on("hide.bs.modal", function () {
         document.activeElement.blur();
     });

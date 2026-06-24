@@ -1,11 +1,23 @@
-﻿const API_BASE_URL = "https://localhost:7146/api";
+const API_BASE_URL = "https://localhost:7146/api";
 
 async function apiRequest(method, path, body) {
+    const token = auth.getToken();
+    const headers = { "Content-Type": "application/json" };
+
+    if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_BASE_URL}${path}`, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: body ? JSON.stringify(body) : undefined
     });
+
+    if (response.status === 401) {
+        auth.logout();
+        return;
+    }
 
     if (response.status === 204) {
         return null;
@@ -42,6 +54,7 @@ function extractErrorMessages(data) {
 }
 
 const api = {
+    login: (email, password) => apiRequest("POST", "/auth/login", { email, password }),
     getPartners: () => apiRequest("GET", "/partners"),
     getPartnerById: (id) => apiRequest("GET", `/partners/${id}`),
     createPartner: (request) => apiRequest("POST", "/partners", request),
