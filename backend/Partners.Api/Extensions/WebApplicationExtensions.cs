@@ -1,5 +1,6 @@
 ﻿using Partners.Api.Endpoints;
 using Partners.Api.Hubs;
+using Serilog;
 
 namespace Partners.Api.Extensions;
 
@@ -7,6 +8,8 @@ internal static class WebApplicationExtensions
 {
     public static WebApplication ApplyWienWebApplicationConfiguration(this WebApplication app)
     {
+        app.UseSerilogRequestLogging();
+
         app.UseExceptionHandler();
 
         if (app.Environment.IsDevelopment())

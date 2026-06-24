@@ -6,6 +6,7 @@ using Partners.Core.Services;
 using Partners.Core.Validators;
 using Partners.Dal.Database;
 using Partners.Dal.Repositories;
+using Serilog;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 using System.Text.Json.Serialization;
 
@@ -13,11 +14,25 @@ namespace Partners.Api.Extensions;
 
 internal static class ServiceCollectionExtensions
 {
-    public static IServiceCollection ApplyWienConfiguration(
-        this IServiceCollection services,
-        IWebHostEnvironment environment,
-        IConfiguration configuration)
+    public static WebApplicationBuilder ApplyWienConfiguration(this WebApplicationBuilder builder)
     {
+        builder.Host.UseSerilog((ctx, config) =>
+        {
+            var logPath = ctx.Configuration["Serilog:LogPath"]!;
+
+            config
+                .ReadFrom.Configuration(ctx.Configuration)
+                .WriteTo.Console()
+                .WriteTo.Async(a => a.File(
+                    logPath,
+                    rollingInterval: RollingInterval.Day,
+                    retainedFileCountLimit: 30,
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"));
+        });
+
+        var services = builder.Services;
+        var configuration = builder.Configuration;
+
         services.AddOpenApi();
 
         services.ConfigureHttpJsonOptions(options =>
@@ -55,6 +70,6 @@ internal static class ServiceCollectionExtensions
             });
         });
 
-        return services;
+        return builder;
     }
 }
