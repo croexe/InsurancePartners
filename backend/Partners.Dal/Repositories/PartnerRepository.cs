@@ -20,7 +20,7 @@ namespace Partners.Dal.Repositories
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 
             var rows = await connection.QueryAsync<PartnerRow>(
-                "dbo.GetAllPartnersWithPolicySummeries",
+                "dbo.GetAllPartnersWithPolicySummeriesFirstServe",
                 commandType: System.Data.CommandType.StoredProcedure);
 
             return rows.Select(row => row.ToPartner());

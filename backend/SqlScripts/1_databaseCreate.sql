@@ -17,6 +17,7 @@ GO
 -- 2. Brisanje starih objekata ako postoje (korisno za development/re-run)
 IF OBJECT_ID('dbo.GetAllPartners', 'P') IS NOT NULL DROP PROCEDURE dbo.GetAllPartners;
 IF OBJECT_ID('dbo.GetAllPartnersWithPolicySummeries', 'P') IS NOT NULL DROP PROCEDURE dbo.GetAllPartnersWithPolicySummeries;
+IF OBJECT_ID('dbo.GetAllPartnersWithPolicySummeriesFirstServe', 'P') IS NOT NULL DROP PROCEDURE dbo.GetAllPartnersWithPolicySummeriesFirstServe;
 IF OBJECT_ID('dbo.GetPartnerById', 'P') IS NOT NULL DROP PROCEDURE dbo.GetPartnerById;
 IF OBJECT_ID('dbo.CreatePartner', 'P') IS NOT NULL DROP PROCEDURE dbo.CreatePartner;
 IF OBJECT_ID('dbo.ExternalCodeExists', 'P') IS NOT NULL DROP PROCEDURE dbo.ExternalCodeExists;
@@ -88,7 +89,7 @@ GO
 -- 4. STORED PROCEDURES - Partner
 -- =========================================================
 
-CREATE OR ALTER PROCEDURE dbo.GetAllPartnersWithPolicySummeries
+CREATE OR ALTER PROCEDURE dbo.GetAllPartnersWithPolicySummeriesFirstServe
 AS
 BEGIN
     SELECT
