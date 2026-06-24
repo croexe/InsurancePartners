@@ -19,12 +19,10 @@ namespace Partners.Dal.Repositories
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 
-            const string sql = @"
-            SELECT Id, PolicyNumber, Amount, PartnerId
-            FROM dbo.Policy
-            WHERE PartnerId = @PartnerId";
-
-            return await connection.QueryAsync<Policy>(sql, new { PartnerId = partnerId });
+            return await connection.QueryAsync<Policy>(
+                "dbo.GetPoliciesByPartnerId",
+                new { PartnerId = partnerId },
+                commandType: System.Data.CommandType.StoredProcedure);
         }
 
         public async Task<int> CreateAsync(Policy policy)
