@@ -19,14 +19,10 @@ namespace Partners.Dal.Repositories
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 
-            const string sql = @"
-            SELECT
-                Id, FirstName, LastName, Address, PartnerNumber, CroatianPIN,
-                PartnerTypeId, CreatedAtUtc, CreateByUser, IsForeign, ExternalCode, Gender
-            FROM dbo.Partner
-            ORDER BY CreatedAtUtc DESC";
+            var rows = await connection.QueryAsync<PartnerRow>(
+                "dbo.GetAllPartners",
+                commandType: System.Data.CommandType.StoredProcedure);
 
-            var rows = await connection.QueryAsync<PartnerRow>(sql);
             return rows.Select(row => row.ToPartner());
         }
 
