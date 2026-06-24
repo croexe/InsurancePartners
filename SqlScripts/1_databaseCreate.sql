@@ -19,6 +19,9 @@ IF OBJECT_ID('dbo.GetAllPartners', 'P') IS NOT NULL DROP PROCEDURE dbo.GetAllPar
 IF OBJECT_ID('dbo.GetPartnerById', 'P') IS NOT NULL DROP PROCEDURE dbo.GetPartnerById;
 IF OBJECT_ID('dbo.CreatePartner', 'P') IS NOT NULL DROP PROCEDURE dbo.CreatePartner;
 IF OBJECT_ID('dbo.ExternalCodeExists', 'P') IS NOT NULL DROP PROCEDURE dbo.ExternalCodeExists;
+IF OBJECT_ID('dbo.GetPoliciesByPartnerId', 'P') IS NOT NULL DROP PROCEDURE dbo.GetPoliciesByPartnerId;
+IF OBJECT_ID('dbo.CreatePolicy', 'P') IS NOT NULL DROP PROCEDURE dbo.CreatePolicy;
+IF OBJECT_ID('dbo.GetPartnerPolicySummaries', 'P') IS NOT NULL DROP PROCEDURE dbo.GetPartnerPolicySummaries;
 IF OBJECT_ID('dbo.Policy', 'U') IS NOT NULL DROP TABLE dbo.Policy;
 IF OBJECT_ID('dbo.Partner', 'U') IS NOT NULL DROP TABLE dbo.Partner;
 GO
@@ -80,7 +83,7 @@ CREATE INDEX IX_Policy_PartnerId ON dbo.Policy (PartnerId);
 GO
 
 -- =========================================================
--- 4. STORED PROCEDURES
+-- 4. STORED PROCEDURES - Partner
 -- =========================================================
 
 CREATE OR ALTER PROCEDURE dbo.GetAllPartners
@@ -136,6 +139,44 @@ BEGIN
     SELECT COUNT(1)
     FROM dbo.Partner
     WHERE ExternalCode = @ExternalCode;
+END
+GO
+
+-- =========================================================
+-- 5. STORED PROCEDURES - Policy
+-- =========================================================
+
+CREATE OR ALTER PROCEDURE dbo.GetPoliciesByPartnerId
+    @PartnerId INT
+AS
+BEGIN
+    SELECT Id, PolicyNumber, Amount, PartnerId
+    FROM dbo.Policy
+    WHERE PartnerId = @PartnerId;
+END
+GO
+
+CREATE OR ALTER PROCEDURE dbo.CreatePolicy
+    @PolicyNumber NVARCHAR(15),
+    @Amount       DECIMAL(18,2),
+    @PartnerId    INT
+AS
+BEGIN
+    INSERT INTO dbo.Policy (PolicyNumber, Amount, PartnerId)
+    OUTPUT INSERTED.Id
+    VALUES (@PolicyNumber, @Amount, @PartnerId);
+END
+GO
+
+CREATE OR ALTER PROCEDURE dbo.GetPartnerPolicySummaries
+AS
+BEGIN
+    SELECT
+        PartnerId,
+        COUNT(1)               AS PolicyCount,
+        ISNULL(SUM(Amount), 0) AS TotalAmount
+    FROM dbo.Policy
+    GROUP BY PartnerId;
 END
 GO
 
