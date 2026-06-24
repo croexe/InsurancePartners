@@ -19,4 +19,6 @@ public class Partner
     public string? ExternalCode { get; set; }
     public Gender Gender { get; set; }
     public virtual ICollection<Policy> Policies { get; set; } = new Collection<Policy>();
+    public int PolicyCount { get; set; }
+    public decimal TotalAmount { get; set; }
 }

@@ -34,7 +34,7 @@ public class PartnerEndpointsTests : IClassFixture<CustomWebApplicationFactory>
     {
         var token = await _factory.GetValidTokenAsync();
         _factory.PartnerServiceMock
-            .Setup(s => s.GetAllAsync())
+            .Setup(s => s.GetAllPartnersAsync())
             .ReturnsAsync([]);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);

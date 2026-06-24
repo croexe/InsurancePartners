@@ -15,12 +15,12 @@ namespace Partners.Dal.Repositories
             _dbConnectionFactory = dbConnectionFactory;
         }
 
-        public async Task<IEnumerable<Partner>> GetAllAsync()
+        public async Task<IEnumerable<Partner>> GetAllPartnersAsync()
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 
             var rows = await connection.QueryAsync<PartnerRow>(
-                "dbo.GetAllPartners",
+                "dbo.GetAllPartnersWithPolicySummeries",
                 commandType: System.Data.CommandType.StoredProcedure);
 
             return rows.Select(row => row.ToPartner());

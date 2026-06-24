@@ -19,32 +19,22 @@ public class PartnerService : IPartnerService
         _policyRepository = policyRepository;
     }
 
-    public async Task<IEnumerable<PartnerListItemResponse>> GetAllAsync()
+    public async Task<IEnumerable<PartnerListItemResponse>> GetAllPartnersAsync()
     {
-        var partners = await _partnerRepository.GetAllAsync();
-        var summaries = await _policyRepository.GetSummariesForPartnerAsync();
+        var partners = await _partnerRepository.GetAllPartnersAsync();
 
-        var result = new List<PartnerListItemResponse>();
-
-        foreach (var partner in partners)
+        return partners.Select(partner => new PartnerListItemResponse
         {
-            var (policyCount, totalAmount) = GetSummaryOrDefault(summaries, partner.Id);
-
-            result.Add(new PartnerListItemResponse
-            {
-                Id = partner.Id,
-                FullName = $"{partner.FirstName} {partner.LastName}",
-                PartnerNumber = partner.PartnerNumber,
-                CroatianPIN = partner.CroatianPIN,
-                PartnerTypeName = SetPartnerType(partner.PartnerTypeId),
-                CreatedAtUtc = partner.CreatedAtUtc,
-                IsForeign = partner.IsForeign,
-                Gender = partner.Gender.ToString(),
-                IsFlagged = IsFlagged(policyCount, totalAmount)
-            });
-        }
-
-        return result;
+            Id = partner.Id,
+            FullName = $"{partner.FirstName} {partner.LastName}",
+            PartnerNumber = partner.PartnerNumber,
+            CroatianPIN = partner.CroatianPIN,
+            PartnerTypeName = SetPartnerType(partner.PartnerTypeId),
+            CreatedAtUtc = partner.CreatedAtUtc,
+            IsForeign = partner.IsForeign,
+            Gender = partner.Gender.ToString(),
+            IsFlagged = IsFlagged(partner.PolicyCount, partner.TotalAmount)
+        });
     }
 
     public async Task<PartnerDetailResponse?> GetByIdAsync(int id)

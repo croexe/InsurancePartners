@@ -6,7 +6,7 @@ namespace Partners.Core.Contracts
 {
     public interface IPartnerService
     {
-        Task<IEnumerable<PartnerListItemResponse>> GetAllAsync();
+        Task<IEnumerable<PartnerListItemResponse>> GetAllPartnersAsync();
         Task<PartnerDetailResponse?> GetByIdAsync(int id);
         Task<PartnerServiceResult> CreateAsync(CreatePartnerRequest request);
     }

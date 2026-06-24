@@ -16,6 +16,7 @@ GO
 
 -- 2. Brisanje starih objekata ako postoje (korisno za development/re-run)
 IF OBJECT_ID('dbo.GetAllPartners', 'P') IS NOT NULL DROP PROCEDURE dbo.GetAllPartners;
+IF OBJECT_ID('dbo.GetAllPartnersWithPolicySummeries', 'P') IS NOT NULL DROP PROCEDURE dbo.GetAllPartnersWithPolicySummeries;
 IF OBJECT_ID('dbo.GetPartnerById', 'P') IS NOT NULL DROP PROCEDURE dbo.GetPartnerById;
 IF OBJECT_ID('dbo.CreatePartner', 'P') IS NOT NULL DROP PROCEDURE dbo.CreatePartner;
 IF OBJECT_ID('dbo.ExternalCodeExists', 'P') IS NOT NULL DROP PROCEDURE dbo.ExternalCodeExists;
@@ -87,14 +88,21 @@ GO
 -- 4. STORED PROCEDURES - Partner
 -- =========================================================
 
-CREATE OR ALTER PROCEDURE dbo.GetAllPartners
+CREATE OR ALTER PROCEDURE dbo.GetAllPartnersWithPolicySummeries
 AS
 BEGIN
     SELECT
-        Id, FirstName, LastName, Address, PartnerNumber, CroatianPIN,
-        PartnerTypeId, CreatedAtUtc, CreateByUser, IsForeign, ExternalCode, Gender
-    FROM dbo.Partner
-    ORDER BY CreatedAtUtc DESC;
+        p.Id, p.FirstName, p.LastName, p.Address, p.PartnerNumber, p.CroatianPIN,
+        p.PartnerTypeId, p.CreatedAtUtc, p.CreateByUser, p.IsForeign, p.ExternalCode, p.Gender,
+        ISNULL(ps.PolicyCount, 0) AS PolicyCount,
+        ISNULL(ps.TotalAmount, 0) AS TotalAmount
+    FROM dbo.Partner p
+    LEFT JOIN (
+        SELECT PartnerId, COUNT(*) AS PolicyCount, SUM(Amount) AS TotalAmount
+        FROM dbo.Policy
+        GROUP BY PartnerId
+    ) ps ON ps.PartnerId = p.Id
+    ORDER BY p.CreatedAtUtc DESC;
 END
 GO
 

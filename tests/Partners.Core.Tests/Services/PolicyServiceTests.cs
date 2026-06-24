@@ -2,6 +2,7 @@ using FluentAssertions;
 using Moq;
 using Partners.Core.Contracts;
 using Partners.Core.DTOs.Requests;
+using Partners.Core.DTOs.Responses;
 using Partners.Core.Models;
 using Partners.Core.Services;
 
@@ -52,8 +53,8 @@ public class PolicyServiceTests
             .ReturnsAsync(10);
 
         _policyRepoMock
-            .Setup(r => r.GetByPartnerIdAsync(1))
-            .ReturnsAsync([new Policy { Amount = 500m }]);
+            .Setup(r => r.GetPolicySummaryByPartnerIdAsync(1))
+            .ReturnsAsync(new PartnerPolicySummaryResponse(1, 1, 500m));
 
         _notifierMock
             .Setup(n => n.NotifyPartnerFlagChangedAsync(It.IsAny<int>(), It.IsAny<bool>()))
@@ -79,8 +80,8 @@ public class PolicyServiceTests
             .ReturnsAsync(1);
 
         _policyRepoMock
-            .Setup(r => r.GetByPartnerIdAsync(1))
-            .ReturnsAsync([]);
+            .Setup(r => r.GetPolicySummaryByPartnerIdAsync(1))
+            .ReturnsAsync(new PartnerPolicySummaryResponse(1, 1, 500m));
 
         _notifierMock
             .Setup(n => n.NotifyPartnerFlagChangedAsync(It.IsAny<int>(), It.IsAny<bool>()))

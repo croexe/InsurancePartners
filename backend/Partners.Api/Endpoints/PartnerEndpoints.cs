@@ -15,7 +15,7 @@ public static class PartnerEndpoints
 
         group.MapGet("/", async (IPartnerService service) =>
         {
-            var partners = await service.GetAllAsync();
+            var partners = await service.GetAllPartnersAsync();
             return Results.Ok(partners);
         })
         .Produces<IEnumerable<PartnerListItemResponse>>();

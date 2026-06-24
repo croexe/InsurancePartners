@@ -20,6 +20,8 @@ namespace Partners.Dal.Helpers
         public bool IsForeign { get; init; }
         public string? ExternalCode { get; init; }
         public string Gender { get; init; } = string.Empty;
+        public int PolicyCount { get; init; }
+        public decimal TotalAmount { get; init; }
 
         public Partner ToPartner() => new()
         {
@@ -34,7 +36,9 @@ namespace Partners.Dal.Helpers
             CreateByUser = CreateByUser,
             IsForeign = IsForeign,
             ExternalCode = ExternalCode,
-            Gender = Enum.Parse<Gender>(Gender, ignoreCase: true)
+            Gender = Enum.Parse<Gender>(Gender, ignoreCase: true),
+            PolicyCount = PolicyCount,
+            TotalAmount = TotalAmount
         };
     }
 }
