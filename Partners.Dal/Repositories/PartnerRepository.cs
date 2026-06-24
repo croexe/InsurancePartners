@@ -66,12 +66,11 @@ namespace Partners.Dal.Repositories
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 
-            const string sql = @"
-            SELECT COUNT(1)
-            FROM dbo.Partner
-            WHERE ExternalCode = @ExternalCode";
+            var count = await connection.QuerySingleAsync<int>(
+                "dbo.ExternalCodeExists",
+                new { ExternalCode = externalCode },
+                commandType: System.Data.CommandType.StoredProcedure);
 
-            var count = await connection.QuerySingleAsync<int>(sql, new { ExternalCode = externalCode });
             return count > 0;
         }
     }

@@ -1,24 +1,32 @@
 /* ===========================================================
-   InsurancePartners - skripta za kreiranje baze i tablica
-   Pokreni cijelu skriptu u SSMS (New Query), F5 za izvrsavanje
+   InsurancePartners - jedinstvena skripta za kreiranje baze,
+   tablica, i stored procedura. Pokreni CIJELU skriptu jednom,
+   u SSMS-u (New Query -> F5), prije prvog pokretanja aplikacije.
    =========================================================== */
 
 -- 1. Kreiranje baze (ako ne postoji)
 IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'WienerPartners')
 BEGIN
-    CREATE DATABASE InsurancePartners;
+    CREATE DATABASE WienerPartners;
 END
 GO
 
 USE WienerPartners;
 GO
 
--- 2. Brisanje starih tablica ako postoje (korisno za development/re-run)
+-- 2. Brisanje starih objekata ako postoje (korisno za development/re-run)
+IF OBJECT_ID('dbo.GetAllPartners', 'P') IS NOT NULL DROP PROCEDURE dbo.GetAllPartners;
+IF OBJECT_ID('dbo.GetPartnerById', 'P') IS NOT NULL DROP PROCEDURE dbo.GetPartnerById;
+IF OBJECT_ID('dbo.CreatePartner', 'P') IS NOT NULL DROP PROCEDURE dbo.CreatePartner;
+IF OBJECT_ID('dbo.ExternalCodeExists', 'P') IS NOT NULL DROP PROCEDURE dbo.ExternalCodeExists;
 IF OBJECT_ID('dbo.Policy', 'U') IS NOT NULL DROP TABLE dbo.Policy;
 IF OBJECT_ID('dbo.Partner', 'U') IS NOT NULL DROP TABLE dbo.Partner;
 GO
 
--- 3. Tablica Partner
+-- =========================================================
+-- 3. TABLICE
+-- =========================================================
+
 CREATE TABLE dbo.Partner
 (
     Id              INT IDENTITY(1,1)      NOT NULL,
@@ -35,42 +43,23 @@ CREATE TABLE dbo.Partner
     Gender          CHAR(1)                NOT NULL,
 
     CONSTRAINT PK_Partner PRIMARY KEY (Id),
-
     CONSTRAINT CK_Partner_FirstName_Length CHECK (LEN(FirstName) >= 2),
     CONSTRAINT CK_Partner_LastName_Length CHECK (LEN(LastName) >= 2),
-
-    -- PartnerNumber: tocno 20 znamenki (samo brojevi)
     CONSTRAINT CK_Partner_PartnerNumber_Digits CHECK (PartnerNumber NOT LIKE '%[^0-9]%'),
-
-    -- CroatianPIN (OIB): ako je upisan, mora imati tocno 11 znamenki
     CONSTRAINT CK_Partner_CroatianPIN_Digits CHECK (CroatianPIN IS NULL OR CroatianPIN NOT LIKE '%[^0-9]%'),
-
-    -- PartnerTypeId: samo 1 (Personal) ili 2 (Legal)
     CONSTRAINT CK_Partner_PartnerTypeId CHECK (PartnerTypeId IN (1, 2)),
-
-    -- Gender: samo M, F ili N
     CONSTRAINT CK_Partner_Gender CHECK (Gender IN ('M', 'F', 'N')),
-
-    -- CreateByUser: mora sadrzavati '@' (osnovna provjera formata e-maila)
     CONSTRAINT CK_Partner_CreateByUser_Email CHECK (CreateByUser LIKE '%_@__%.__%'),
-
-    -- ExternalCode: ako je upisan, mora imati najmanje 10 znakova (jedinstvenost se
-    -- provodi kroz filtrirani unique indeks ispod, ne kroz standardni UNIQUE constraint)
     CONSTRAINT CK_Partner_ExternalCode_Length CHECK (ExternalCode IS NULL OR LEN(ExternalCode) >= 10)
 );
 GO
 
--- 3a. Filtrirani unique indeks za ExternalCode.
--- Standardni UNIQUE constraint u SQL Serveru dozvoljava SAMO JEDAN NULL u koloni -
--- drugi NULL bi bio tretiran kao duplikat, sto je pogresno za neobavezno polje
--- gdje vise partnera legitimno nema ExternalCode. Filtrirani indeks (WHERE ExternalCode
--- IS NOT NULL) provjerava jedinstvenost SAMO kad je vrijednost upisana.
+-- Filtrirani unique indeks - dozvoljava vise partnera s NULL ExternalCode
 CREATE UNIQUE INDEX UQ_Partner_ExternalCode
     ON dbo.Partner (ExternalCode)
     WHERE ExternalCode IS NOT NULL;
 GO
 
--- 4. Tablica Policy
 CREATE TABLE dbo.Policy
 (
     Id              INT IDENTITY(1,1)      NOT NULL,
@@ -79,18 +68,75 @@ CREATE TABLE dbo.Policy
     PartnerId       INT                    NOT NULL,
 
     CONSTRAINT PK_Policy PRIMARY KEY (Id),
-
     CONSTRAINT CK_Policy_PolicyNumber_Length CHECK (LEN(PolicyNumber) >= 10),
-
     CONSTRAINT FK_Policy_Partner FOREIGN KEY (PartnerId)
         REFERENCES dbo.Partner (Id)
         ON DELETE CASCADE
 );
 GO
 
--- 5. Indeksi za uobicajene upite
 CREATE INDEX IX_Partner_CreatedAtUtc ON dbo.Partner (CreatedAtUtc DESC);
 CREATE INDEX IX_Policy_PartnerId ON dbo.Policy (PartnerId);
 GO
 
-PRINT 'Baza i tablice su uspjesno kreirane.';
+-- =========================================================
+-- 4. STORED PROCEDURES
+-- =========================================================
+
+CREATE OR ALTER PROCEDURE dbo.GetAllPartners
+AS
+BEGIN
+    SELECT
+        Id, FirstName, LastName, Address, PartnerNumber, CroatianPIN,
+        PartnerTypeId, CreatedAtUtc, CreateByUser, IsForeign, ExternalCode, Gender
+    FROM dbo.Partner
+    ORDER BY CreatedAtUtc DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE dbo.GetPartnerById
+    @Id INT
+AS
+BEGIN
+    SELECT
+        Id, FirstName, LastName, Address, PartnerNumber, CroatianPIN,
+        PartnerTypeId, CreatedAtUtc, CreateByUser, IsForeign, ExternalCode, Gender
+    FROM dbo.Partner
+    WHERE Id = @Id;
+END
+GO
+
+CREATE OR ALTER PROCEDURE dbo.CreatePartner
+    @FirstName     NVARCHAR(255),
+    @LastName      NVARCHAR(255),
+    @Address       NVARCHAR(MAX),
+    @PartnerNumber CHAR(20),
+    @CroatianPIN   CHAR(11),
+    @PartnerTypeId TINYINT,
+    @CreateByUser  NVARCHAR(255),
+    @IsForeign     BIT,
+    @ExternalCode  NVARCHAR(20),
+    @Gender        CHAR(1)
+AS
+BEGIN
+    INSERT INTO dbo.Partner
+        (FirstName, LastName, Address, PartnerNumber, CroatianPIN,
+         PartnerTypeId, CreateByUser, IsForeign, ExternalCode, Gender)
+    OUTPUT INSERTED.Id
+    VALUES
+        (@FirstName, @LastName, @Address, @PartnerNumber, @CroatianPIN,
+         @PartnerTypeId, @CreateByUser, @IsForeign, @ExternalCode, @Gender);
+END
+GO
+
+CREATE OR ALTER PROCEDURE dbo.ExternalCodeExists
+    @ExternalCode NVARCHAR(20)
+AS
+BEGIN
+    SELECT COUNT(1)
+    FROM dbo.Partner
+    WHERE ExternalCode = @ExternalCode;
+END
+GO
+
+PRINT 'Baza, tablice, i stored procedure su uspjesno kreirane.';
