@@ -1,7 +1,7 @@
 ﻿async function loadPartial(targetId, url) {
     const response = await fetch(url);
     if (!response.ok) {
-        throw new Error("Neuspjelo ucitavanje partiala: " + url);
+        throw new Error("Partial loading failed: " + url);
     }
     const html = await response.text();
     document.getElementById(targetId).innerHTML = html;
