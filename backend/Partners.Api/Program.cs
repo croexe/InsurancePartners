@@ -9,3 +9,5 @@ await app.ApplyWienMigrationsAndSeedAsync();
 
 app.ApplyWienWebApplicationConfiguration();
 app.Run();
+
+public partial class Program { }

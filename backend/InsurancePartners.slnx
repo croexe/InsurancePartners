@@ -6,4 +6,8 @@
     <Project Path="Partners.Dal/Partners.Dal.csproj" />
   </Folder>
   <Project Path="Partners.Api/Partners.Api.csproj" />
+  <Folder Name="/Tests/">
+    <Project Path="../tests/Partners.Core.Tests/Partners.Core.Tests.csproj" />
+    <Project Path="../tests/Partners.Api.Tests/Partners.Api.Tests.csproj" />
+  </Folder>
 </Solution>
