@@ -29,11 +29,6 @@ namespace Partners.Dal.Repositories
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 
-            const string sql = @"
-            INSERT INTO dbo.Policy (PolicyNumber, Amount, PartnerId)
-            OUTPUT INSERTED.Id
-            VALUES (@PolicyNumber, @Amount, @PartnerId)";
-
             var parameters = new
             {
                 policy.PolicyNumber,
@@ -41,7 +36,10 @@ namespace Partners.Dal.Repositories
                 policy.PartnerId
             };
 
-            return await connection.QuerySingleAsync<int>(sql, parameters);
+            return await connection.QuerySingleAsync<int>(
+                "dbo.CreatePolicy",
+                parameters,
+                commandType: System.Data.CommandType.StoredProcedure);
         }
 
         public async Task<IReadOnlyDictionary<int, PartnerPolicySummaryResponse>> GetSummariesForAllPartnersAsync()
