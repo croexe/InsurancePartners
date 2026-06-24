@@ -42,19 +42,13 @@ namespace Partners.Dal.Repositories
                 commandType: System.Data.CommandType.StoredProcedure);
         }
 
-        public async Task<IReadOnlyDictionary<int, PartnerPolicySummaryResponse>> GetSummariesForAllPartnersAsync()
+        public async Task<IReadOnlyDictionary<int, PartnerPolicySummaryResponse>> GetSummariesForPartnerAsync()
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 
-            const string sql = @"
-            SELECT
-                PartnerId,
-                COUNT(1)            AS PolicyCount,
-                ISNULL(SUM(Amount), 0) AS TotalAmount
-            FROM dbo.Policy
-            GROUP BY PartnerId";
-
-            var rows = await connection.QueryAsync<PartnerPolicySummaryResponse>(sql);
+            var rows = await connection.QueryAsync<PartnerPolicySummaryResponse>(
+                "dbo.GetPartnerPolicySummaries",
+                commandType: System.Data.CommandType.StoredProcedure);
 
             return rows.ToDictionary(r => r.PartnerId, r => r);
         }

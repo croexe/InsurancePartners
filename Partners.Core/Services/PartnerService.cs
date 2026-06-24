@@ -24,7 +24,7 @@ namespace Partners.Core.Services
         public async Task<IEnumerable<PartnerListItemResponse>> GetAllAsync()
         {
             var partners = await _partnerRepository.GetAllAsync();
-            var summaries = await _policyRepository.GetSummariesForAllPartnersAsync();
+            var summaries = await _policyRepository.GetSummariesForPartnerAsync();
 
             var result = new List<PartnerListItemResponse>();
 

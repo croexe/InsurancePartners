@@ -7,6 +7,6 @@ namespace Partners.Core.Contracts
     {
         Task<IEnumerable<Policy>> GetByPartnerIdAsync(int partnerId);
         Task<int> CreateAsync(Policy policy);
-        Task<IReadOnlyDictionary<int, PartnerPolicySummaryResponse>> GetSummariesForAllPartnersAsync();
+        Task<IReadOnlyDictionary<int, PartnerPolicySummaryResponse>> GetSummariesForPartnerAsync();
     }
 }
