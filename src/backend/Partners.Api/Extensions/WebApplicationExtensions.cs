@@ -13,9 +13,6 @@ internal static class WebApplicationExtensions
             app.MapOpenApi();
         }
 
-        app.UseDefaultFiles();
-        app.UseStaticFiles();
-
         app.UseHttpsRedirection();
 
         app.UseCors("AllowFrontend");
