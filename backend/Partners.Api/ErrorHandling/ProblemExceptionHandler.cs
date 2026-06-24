@@ -36,7 +36,7 @@ public class ProblemExceptionHandler : IExceptionHandler
             {
                 Title = "An unexpected error occurred.",
                 Status = (int)HttpStatusCode.InternalServerError,
-                Type = exception.GetType().Name
+                Type = "https://tools.ietf.org/html/rfc9110#section-15.6.1"
             },
             Exception = exception
         });
