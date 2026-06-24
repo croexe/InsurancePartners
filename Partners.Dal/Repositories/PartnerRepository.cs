@@ -42,15 +42,6 @@ namespace Partners.Dal.Repositories
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 
-            const string sql = @"
-            INSERT INTO dbo.Partner
-                (FirstName, LastName, Address, PartnerNumber, CroatianPIN,
-                 PartnerTypeId, CreateByUser, IsForeign, ExternalCode, Gender)
-            OUTPUT INSERTED.Id
-            VALUES
-                (@FirstName, @LastName, @Address, @PartnerNumber, @CroatianPIN,
-                 @PartnerTypeId, @CreateByUser, @IsForeign, @ExternalCode, @Gender)";
-
             var parameters = new
             {
                 partner.FirstName,
@@ -65,7 +56,10 @@ namespace Partners.Dal.Repositories
                 Gender = partner.Gender.ToString()
             };
 
-            return await connection.QuerySingleAsync<int>(sql, parameters);
+            return await connection.QuerySingleAsync<int>(
+                "dbo.CreatePartner",
+                parameters,
+                commandType: System.Data.CommandType.StoredProcedure);
         }
 
         public async Task<bool> ExternalCodeExistsAsync(string externalCode)
