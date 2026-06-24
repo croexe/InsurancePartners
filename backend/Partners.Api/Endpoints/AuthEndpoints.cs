@@ -13,6 +13,9 @@ public static class AuthEndpoints
     {
         app.MapPost("/api/auth/login", async (LoginRequest request, UserManager<IdentityUser> userManager, IConfiguration config) =>
         {
+            if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
+                return Results.Unauthorized();
+
             var user = await userManager.FindByEmailAsync(request.Email);
             if (user is null || !await userManager.CheckPasswordAsync(user, request.Password))
             {
