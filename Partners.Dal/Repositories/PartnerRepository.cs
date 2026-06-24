@@ -34,14 +34,11 @@ namespace Partners.Dal.Repositories
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 
-            const string sql = @"
-            SELECT
-                Id, FirstName, LastName, Address, PartnerNumber, CroatianPIN,
-                PartnerTypeId, CreatedAtUtc, CreateByUser, IsForeign, ExternalCode, Gender
-            FROM dbo.Partner
-            WHERE Id = @Id";
+            var row = await connection.QuerySingleOrDefaultAsync<PartnerRow>(
+                "dbo.GetPartnerById",
+                new { Id = id },
+                commandType: System.Data.CommandType.StoredProcedure);
 
-            var row = await connection.QuerySingleOrDefaultAsync<PartnerRow>(sql, new { Id = id });
             return row?.ToPartner();
         }
 
