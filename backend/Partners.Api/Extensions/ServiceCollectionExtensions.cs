@@ -103,9 +103,9 @@ internal static class ServiceCollectionExtensions
             options.AddPolicy("AllowFrontend", policy =>
             {
                 policy
+                    .WithOrigins(builder.Configuration["Cors:AllowedOrigin"]!)
                     .AllowAnyHeader()
                     .AllowAnyMethod()
-                    .SetIsOriginAllowed(_ => true) // development
                     .AllowCredentials();
             });
         });
