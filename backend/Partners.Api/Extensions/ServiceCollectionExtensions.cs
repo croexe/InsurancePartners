@@ -56,6 +56,11 @@ internal static class ServiceCollectionExtensions
             options.Password.RequireNonAlphanumeric = true;
             options.Password.RequireDigit = true;
             options.Password.RequireUppercase = true;
+
+            // Zakljucavanje racuna nakon 5 neuspjelih pokusaja na 15 minuta (zastita od brute-force).
+            options.Lockout.MaxFailedAccessAttempts = 5;
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+            options.Lockout.AllowedForNewUsers = true;
         })
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();
