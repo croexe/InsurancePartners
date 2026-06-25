@@ -34,7 +34,7 @@ public static class PartnerEndpoints
         {
             var result = await service.CreatePartnerAsync(request, cancellationToken);
             return result.Success
-                ? Results.Created($"api/partners/{result.PartnerId}", new { id = result.PartnerId })
+                ? Results.Created($"/api/partners/{result.PartnerId}", new { id = result.PartnerId })
                 : Results.BadRequest(new { errors = result.Errors });
         })
         .Produces(StatusCodes.Status201Created)

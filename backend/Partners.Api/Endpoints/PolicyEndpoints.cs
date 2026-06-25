@@ -41,7 +41,7 @@ public static class PolicyEndpoints
                         result.Policy!.Id, result.Policy.PartnerId);
             }
 
-            return Results.Created($"api/partners/{result.Policy!.PartnerId}", result.Policy);
+            return Results.Created($"/api/partners/{result.Policy!.PartnerId}", result.Policy);
         })
         .Produces<PolicyResponse>(StatusCodes.Status201Created)
         .ProducesProblem(StatusCodes.Status400BadRequest);
