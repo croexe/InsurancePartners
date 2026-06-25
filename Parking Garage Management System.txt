@@ -1,0 +1,160 @@
+ZADATAK 2 — ARHITEKTURA SUSTAVA ZA VODENJE PARKIRALISTA
+=========================================================
+
+OTVORENA PITANJA (blokeri — treba razjasniti prije razvoja)
+------------------------------------------------------------
+1. Kartica ili QR? — nacin identifikacije ulaska nije definiran, a sve ovisi o tome
+2. Ugovorni korisnici — placaju li po sesiji ili pausalno? Kako se identificiraju na ulazu?
+3. Kisna detekcija — rucni unos operatera, IoT senzori ili weather API?
+4. Vise vrsta korisnika — koje vrste? (regular, ugovorni, djelatnik...)
+
+
+PRIORITETI (prema klijentu)
+----------------------------
+[KRITICNO]  Naplata — nikad ne smije pasti
+[VAZNO]     Ukupan broj slobodnih mjesta
+[POZELJNO]  Slobodna mjesta po katu
+[POZELJNO]  Kisna akcija
+[REPORTING] Mjesecni izvjestaji
+
+
+MODEL BAZE (idejni nacrt)
+--------------------------
+
+ParkingSpot
+  - Id
+  - FloorId (FK)
+  - IsCovered (BIT)
+  - Status (Free/Occupied)
+
+ParkingFloor
+  - Id
+  - FloorNumber
+  - GarageId (FK)
+
+ParkingSession
+  - Id
+  - SpotId (FK)
+  - UserId (FK, nullable — za anonimne)
+  - ContractId (FK, nullable)
+  - TicketCode (unique, za anonimne korisnike)
+  - EntryTime
+  - PaymentTime (nullable)
+  - ExitTime (nullable)
+  - TotalAmount
+  - RainyMinutes (za kisni popust)
+
+Payment
+  - Id
+  - SessionId (FK)
+  - Amount
+  - PaidAt
+  - Type (Machine / Contract)
+
+Contract
+  - Id
+  - UserId (FK)
+  - Rate (po satu ili pausal)
+  - ValidFrom
+  - ValidTo
+
+WeatherLog
+  - Id
+  - RecordedAt
+  - IsRaining (BIT)
+
+User
+  - Id
+  - IdentityRef (ASP.NET Identity)
+  - Type (Regular / Contract / Staff)
+
+
+PSEUDOKOD KLJUCNIH PROCESA
+---------------------------
+
+1. ULAZ U GARAZU
+   function onEntry(ticketCode):
+       spot = findNearestFreeSpot()
+       if spot == null → zabrani ulaz (puno)
+
+       session = new ParkingSession(
+           spot, ticketCode, entryTime = now()
+       )
+       spot.Status = Occupied
+       freeSpots.decrement(spot.floor)
+       save(session)
+       return ticketCode
+
+2. NAPLATA NA APARATU
+   function onPayment(ticketCode):
+       session = find(ticketCode)
+       if session.PaymentTime != null → vec placeno
+
+       duration = now() - session.EntryTime  // u minutama
+       rainyMinutes = WeatherLog.countRainy(
+           session.EntryTime, now()
+       )
+
+       baseRate = getRateForSpot(session.spot)
+
+       if !session.spot.IsCovered AND rainyMinutes / duration >= 0.33:
+           baseRate = baseRate * 0.5  // kisni popust
+
+       amount = calculateAmount(duration, baseRate)
+
+       session.PaymentTime = now()
+       session.TotalAmount = amount
+       session.RainyMinutes = rainyMinutes
+       save(session, payment)
+       return amount
+
+3. IZLAZ IZ GARAZE
+   function onExit(ticketCode):
+       session = find(ticketCode)
+
+       if session.PaymentTime == null:
+           → zabrani izlaz (nije placeno)
+
+       graceExpired = now() > session.PaymentTime + 10min
+
+       if graceExpired:
+           → zabrani izlaz, treba platiti dodatno vrijeme
+
+       session.ExitTime = now()
+       spot.Status = Free
+       freeSpots.increment(spot.floor)
+       save(session)
+       → otvori rampu
+
+
+ARHITEKTURNE ODLUKE
+--------------------
+
+1. MONOLITH, NE MICROSERVICES
+   Sustav nije toliko slozen da opravda distribuiranu arhitekturu.
+   Billing mora biti pouzdan → manje moving parts = manje tocaka kvara.
+
+2. BILLING KAO ZASEBNI MODUL UNUTAR MONOLITHA
+   Izolirani servis s vlastitim transakcijama.
+   Niti jedan drugi modul ne smije direktno pisati u Payment tablicu.
+
+3. REAL-TIME SLOBODNA MJESTA
+   In-memory counter (Redis ili app cache) koji se inicijalizira iz baze pri startu.
+   Dekrement/inkrement pri svakom ulasku/izlasku.
+   Baza je source of truth, cache je za brzinu.
+
+4. KISNA DETEKCIJA
+   Weather API (npr. OpenWeatherMap) s polling intervalima od 5 min.
+   Zapisuje u WeatherLog tablicu.
+   Ako API ne odgovara → nema kisnog popusta (fail-safe, ne fail-open).
+
+5. UGOVORNI KORISNICI
+   Identificiraju se karticom/RFID pri ulasku.
+   Sesija se veze na Contract.
+   Naplata se obracunava prema ugovornoj stopi na kraju mjeseca.
+
+6. REPORTING
+   Cron job koji na kraju svakog mjeseca agregira ParkingSession podatke.
+   Sprema agregirane podatke u MonthlyReport tablicu.
+   Klijent gleda dashboard nad tim podacima.
+   Sadrzaj reporta: popunjenost kapaciteta, prihod, isplativost kisne akcije.
