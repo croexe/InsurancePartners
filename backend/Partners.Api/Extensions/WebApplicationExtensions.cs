@@ -38,6 +38,14 @@ internal static class WebApplicationExtensions
 
     public static async Task ApplyWienMigrationsAndSeedAsync(this WebApplication app)
     {
+        // Auto-migracija i seed se izvrsavaju samo u developmentu. U produkciji
+        // se migracije primjenjuju kao zaseban deploy korak (izbjegava race condition
+        // kod vise instanci), a korisnici se provizioniraju zasebno.
+        if (!app.Environment.IsDevelopment())
+        {
+            return;
+        }
+
         using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         await db.Database.MigrateAsync();
