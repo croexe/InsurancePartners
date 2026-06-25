@@ -13,6 +13,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
     public Mock<IPartnerService> PartnerServiceMock { get; } = new();
     public Mock<IPolicyService> PolicyServiceMock { get; } = new();
+    public Mock<IPartnerNotifier> PartnerNotifierMock { get; } = new();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -36,6 +37,10 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             var policyService = services.SingleOrDefault(d => d.ServiceType == typeof(IPolicyService));
             if (policyService != null) services.Remove(policyService);
             services.AddScoped<IPolicyService>(_ => PolicyServiceMock.Object);
+
+            var partnerNotifier = services.SingleOrDefault(d => d.ServiceType == typeof(IPartnerNotifier));
+            if (partnerNotifier != null) services.Remove(partnerNotifier);
+            services.AddScoped<IPartnerNotifier>(_ => PartnerNotifierMock.Object);
         });
 
         builder.UseEnvironment("Development");

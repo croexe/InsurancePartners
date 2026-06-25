@@ -12,12 +12,11 @@ public class PolicyServiceTests
 {
     private readonly Mock<IPolicyRepository> _policyRepoMock = new();
     private readonly Mock<IPartnerRepository> _partnerRepoMock = new();
-    private readonly Mock<IPartnerNotifier> _notifierMock = new();
     private readonly PolicyService _service;
 
     public PolicyServiceTests()
     {
-        _service = new PolicyService(_policyRepoMock.Object, _partnerRepoMock.Object, _notifierMock.Object);
+        _service = new PolicyService(_policyRepoMock.Object, _partnerRepoMock.Object);
     }
 
     private static CreatePolicyRequest ValidRequest() => new()
@@ -56,10 +55,6 @@ public class PolicyServiceTests
             .Setup(r => r.FetchPolicySummaryByPartnerIdAsync(1))
             .ReturnsAsync(new PartnerPolicySummaryResponse(1, 1, 500m));
 
-        _notifierMock
-            .Setup(n => n.NotifyPartnerFlagChangedAsync(It.IsAny<int>(), It.IsAny<bool>()))
-            .Returns(Task.CompletedTask);
-
         var result = await _service.CreatePolicyAsync(ValidRequest());
 
         result.Success.Should().BeTrue();
@@ -69,7 +64,7 @@ public class PolicyServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_ValidRequest_NotifiesSignalR()
+    public async Task CreateAsync_PartnerOverThreshold_ReturnsResultFlagged()
     {
         _partnerRepoMock
             .Setup(r => r.FetchPartnerByIdAsync(1))
@@ -77,18 +72,15 @@ public class PolicyServiceTests
 
         _policyRepoMock
             .Setup(r => r.InsertPolicyAsync(It.IsAny<Policy>()))
-            .ReturnsAsync(1);
+            .ReturnsAsync(10);
 
         _policyRepoMock
             .Setup(r => r.FetchPolicySummaryByPartnerIdAsync(1))
-            .ReturnsAsync(new PartnerPolicySummaryResponse(1, 1, 500m));
+            .ReturnsAsync(new PartnerPolicySummaryResponse(1, 6, 9000m));
 
-        _notifierMock
-            .Setup(n => n.NotifyPartnerFlagChangedAsync(It.IsAny<int>(), It.IsAny<bool>()))
-            .Returns(Task.CompletedTask);
+        var result = await _service.CreatePolicyAsync(ValidRequest());
 
-        await _service.CreatePolicyAsync(ValidRequest());
-
-        _notifierMock.Verify(n => n.NotifyPartnerFlagChangedAsync(1, It.IsAny<bool>()), Times.Once);
+        result.Success.Should().BeTrue();
+        result.IsFlagged.Should().BeTrue();
     }
 }

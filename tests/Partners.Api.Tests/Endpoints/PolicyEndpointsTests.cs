@@ -40,13 +40,47 @@ public class PolicyEndpointsTests : IClassFixture<CustomWebApplicationFactory>
                 PolicyNumber = "POL1234567",
                 Amount = 500m,
                 PartnerId = 1
-            }));
+            }, isFlagged: true));
 
         var request = new CreatePolicyRequest
         {
             PolicyNumber = "POL1234567",
             Amount = 500m,
             PartnerId = 1
+        };
+
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var response = await _client.PostAsJsonAsync("/api/policies", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        _factory.PartnerNotifierMock.Verify(
+            n => n.NotifyPartnerFlagChangedAsync(1, true), Times.Once);
+    }
+
+    [Fact]
+    public async Task Create_NotifierThrows_StillReturns201()
+    {
+        var token = await _factory.GetValidTokenAsync();
+        _factory.PolicyServiceMock
+            .Setup(s => s.CreatePolicyAsync(It.IsAny<CreatePolicyRequest>()))
+            .ReturnsAsync(PolicyServiceResult.Ok(new PolicyResponse
+            {
+                Id = 2,
+                PolicyNumber = "POL7654321",
+                Amount = 500m,
+                PartnerId = 99
+            }, isFlagged: false));
+
+        // Specifican partnerId (99) da setup ne kontaminira ostale testove koji koriste partnerId 1.
+        _factory.PartnerNotifierMock
+            .Setup(n => n.NotifyPartnerFlagChangedAsync(99, It.IsAny<bool>()))
+            .ThrowsAsync(new Exception("SignalR hub unavailable"));
+
+        var request = new CreatePolicyRequest
+        {
+            PolicyNumber = "POL7654321",
+            Amount = 500m,
+            PartnerId = 99
         };
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);

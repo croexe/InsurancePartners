@@ -11,13 +11,11 @@ public class PolicyService : IPolicyService
 {
     private readonly IPolicyRepository _policyRepository;
     private readonly IPartnerRepository _partnerRepository;
-    private readonly IPartnerNotifier _partnerNotifier;
 
-    public PolicyService(IPolicyRepository policyRepository, IPartnerRepository partnerRepository, IPartnerNotifier partnerNotifier)
+    public PolicyService(IPolicyRepository policyRepository, IPartnerRepository partnerRepository)
     {
         _policyRepository = policyRepository;
         _partnerRepository = partnerRepository;
-        _partnerNotifier = partnerNotifier;
     }
 
     public async Task<PolicyServiceResult> CreatePolicyAsync(CreatePolicyRequest request)
@@ -48,8 +46,6 @@ public class PolicyService : IPolicyService
         var summary = await _policyRepository.FetchPolicySummaryByPartnerIdAsync(policy.PartnerId);
         var isFlagged = PartnerFlagRules.IsFlagged(summary.PolicyCount, summary.TotalAmount);
 
-        await _partnerNotifier.NotifyPartnerFlagChangedAsync(policy.PartnerId, isFlagged);
-
-        return PolicyServiceResult.Ok(response);
+        return PolicyServiceResult.Ok(response, isFlagged);
     }
 }

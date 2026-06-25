@@ -13,12 +13,34 @@ public static class PolicyEndpoints
             .AddFluentValidationAutoValidation()
             .RequireAuthorization(policy => policy.RequireRole("PolicyManager"));
 
-        group.MapPost("/", async (CreatePolicyRequest request, IPolicyService service) =>
+        group.MapPost("/", async (
+            CreatePolicyRequest request,
+            IPolicyService service,
+            IPartnerNotifier notifier,
+            ILoggerFactory loggerFactory) =>
         {
             var result = await service.CreatePolicyAsync(request);
-            return result.Success
-                ? Results.Created(string.Empty, result.Policy)
-                : Results.BadRequest(new { errors = result.Errors });
+
+            if (!result.Success)
+            {
+                return Results.BadRequest(new { errors = result.Errors });
+            }
+
+            // Notifikacija je sporedni efekt — njen neuspjeh ne smije srušiti uspješno kreiranu policu.
+            try
+            {
+                await notifier.NotifyPartnerFlagChangedAsync(result.Policy!.PartnerId, result.IsFlagged);
+            }
+            catch (Exception ex)
+            {
+                loggerFactory
+                    .CreateLogger("Partners.Api.Endpoints.PolicyEndpoints")
+                    .LogWarning(ex,
+                        "Polica {PolicyId} je spremljena, ali real-time notifikacija o flagu partnera {PartnerId} nije uspjela.",
+                        result.Policy!.Id, result.Policy.PartnerId);
+            }
+
+            return Results.Created($"api/partners/{result.Policy!.PartnerId}", result.Policy);
         })
         .Produces<PolicyResponse>(StatusCodes.Status201Created)
         .ProducesProblem(StatusCodes.Status400BadRequest);
