@@ -23,17 +23,17 @@ public class PartnerService : IPartnerService
     {
         var partners = await _partnerRepository.FetchAllPartnersAsync();
 
-        return partners.Select(partner => new PartnerListItemResponse
+        return partners.Select(item => new PartnerListItemResponse
         {
-            Id = partner.Id,
-            FullName = $"{partner.FirstName} {partner.LastName}",
-            PartnerNumber = partner.PartnerNumber,
-            CroatianPIN = partner.CroatianPIN,
-            PartnerTypeName = SetPartnerType(partner.PartnerTypeId),
-            CreatedAtUtc = partner.CreatedAtUtc,
-            IsForeign = partner.IsForeign,
-            Gender = partner.Gender.ToString(),
-            IsFlagged = IsFlagged(partner.PolicyCount, partner.TotalAmount)
+            Id = item.Partner.Id,
+            FullName = $"{item.Partner.FirstName} {item.Partner.LastName}",
+            PartnerNumber = item.Partner.PartnerNumber,
+            CroatianPIN = item.Partner.CroatianPIN,
+            PartnerTypeName = SetPartnerType(item.Partner.PartnerTypeId),
+            CreatedAtUtc = item.Partner.CreatedAtUtc,
+            IsForeign = item.Partner.IsForeign,
+            Gender = item.Partner.Gender.ToString(),
+            IsFlagged = IsFlagged(item.PolicyCount, item.TotalAmount)
         });
     }
 

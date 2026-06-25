@@ -1,8 +1,5 @@
-﻿using Partners.Core.Models;
+using Partners.Core.Models;
 using Partners.Core.Models.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Partners.Dal.Helpers
 {
@@ -36,7 +33,12 @@ namespace Partners.Dal.Helpers
             CreateByUser = CreateByUser,
             IsForeign = IsForeign,
             ExternalCode = ExternalCode,
-            Gender = Enum.Parse<Gender>(Gender, ignoreCase: true),
+            Gender = Enum.Parse<Gender>(Gender, ignoreCase: true)
+        };
+
+        public PartnerWithSummary ToPartnerWithSummary() => new()
+        {
+            Partner = ToPartner(),
             PolicyCount = PolicyCount,
             TotalAmount = TotalAmount
         };

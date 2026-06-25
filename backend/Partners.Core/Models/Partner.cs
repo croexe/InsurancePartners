@@ -1,6 +1,4 @@
-﻿using Partners.Core.Models.Enums;
-using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
+using Partners.Core.Models.Enums;
 
 namespace Partners.Core.Models;
 
@@ -18,7 +16,4 @@ public class Partner
     public bool IsForeign { get; set; }
     public string? ExternalCode { get; set; }
     public Gender Gender { get; set; }
-    public virtual ICollection<Policy> Policies { get; set; } = new Collection<Policy>();
-    public int PolicyCount { get; set; }
-    public decimal TotalAmount { get; set; }
 }

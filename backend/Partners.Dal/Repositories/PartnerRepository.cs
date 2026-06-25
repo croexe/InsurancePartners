@@ -15,7 +15,7 @@ namespace Partners.Dal.Repositories
             _dbConnectionFactory = dbConnectionFactory;
         }
 
-        public async Task<IEnumerable<Partner>> FetchAllPartnersAsync()
+        public async Task<IEnumerable<PartnerWithSummary>> FetchAllPartnersAsync()
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 
@@ -23,7 +23,7 @@ namespace Partners.Dal.Repositories
                 "dbo.GetAllPartnersWithPolicySummeriesFirstServe",
                 commandType: System.Data.CommandType.StoredProcedure);
 
-            return rows.Select(row => row.ToPartner());
+            return rows.Select(row => row.ToPartnerWithSummary());
         }
 
         public async Task<Partner?> FetchPartnerByIdAsync(int id)
