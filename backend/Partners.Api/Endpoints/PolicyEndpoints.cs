@@ -17,9 +17,10 @@ public static class PolicyEndpoints
             CreatePolicyRequest request,
             IPolicyService service,
             IPartnerNotifier notifier,
-            ILoggerFactory loggerFactory) =>
+            ILoggerFactory loggerFactory,
+            CancellationToken cancellationToken) =>
         {
-            var result = await service.CreatePolicyAsync(request);
+            var result = await service.CreatePolicyAsync(request, cancellationToken);
 
             if (!result.Success)
             {

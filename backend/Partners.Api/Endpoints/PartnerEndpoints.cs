@@ -13,16 +13,16 @@ public static class PartnerEndpoints
             .AddFluentValidationAutoValidation()
             .RequireAuthorization(policy => policy.RequireRole("PolicyManager"));
 
-        group.MapGet("/", async (IPartnerService service) =>
+        group.MapGet("/", async (IPartnerService service, CancellationToken cancellationToken) =>
         {
-            var partners = await service.GetAllPartnersAsync();
+            var partners = await service.GetAllPartnersAsync(cancellationToken);
             return Results.Ok(partners);
         })
         .Produces<IEnumerable<PartnerListItemResponse>>();
 
-        group.MapGet("/{id:int}", async (int id, IPartnerService service) =>
+        group.MapGet("/{id:int}", async (int id, IPartnerService service, CancellationToken cancellationToken) =>
         {
-            var partner = await service.GetPartnerDetailsByIdAsync(id);
+            var partner = await service.GetPartnerDetailsByIdAsync(id, cancellationToken);
             return partner is null
                 ? Results.NotFound(new { message = $"Partner with Id '{id}' was not found." })
                 : Results.Ok(partner);
@@ -30,9 +30,9 @@ public static class PartnerEndpoints
         .Produces<PartnerDetailResponse>()
         .ProducesProblem(StatusCodes.Status404NotFound);
 
-        group.MapPost("/", async (CreatePartnerRequest request, IPartnerService service) =>
+        group.MapPost("/", async (CreatePartnerRequest request, IPartnerService service, CancellationToken cancellationToken) =>
         {
-            var result = await service.CreatePartnerAsync(request);
+            var result = await service.CreatePartnerAsync(request, cancellationToken);
             return result.Success
                 ? Results.Created($"api/partners/{result.PartnerId}", new { id = result.PartnerId })
                 : Results.BadRequest(new { errors = result.Errors });

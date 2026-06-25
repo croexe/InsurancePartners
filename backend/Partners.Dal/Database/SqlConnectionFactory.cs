@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Text;
 using Microsoft.Data.SqlClient;
 
 namespace Partners.Dal.Database
@@ -15,10 +12,10 @@ namespace Partners.Dal.Database
             _connectionString = connectionString;
         }
 
-        public async Task<IDbConnection> CreateConnectionAsync()
+        public async Task<IDbConnection> CreateConnectionAsync(CancellationToken cancellationToken = default)
         {
             var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
+            await connection.OpenAsync(cancellationToken);
             return connection;
         }
     }

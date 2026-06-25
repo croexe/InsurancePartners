@@ -1,10 +1,10 @@
-﻿using Partners.Core.DTOs.Requests;
+using Partners.Core.DTOs.Requests;
 using Partners.Core.Results;
 
 namespace Partners.Core.Contracts
 {
     public interface IPolicyService
     {
-        Task<PolicyServiceResult> CreatePolicyAsync(CreatePolicyRequest request);
+        Task<PolicyServiceResult> CreatePolicyAsync(CreatePolicyRequest request, CancellationToken cancellationToken = default);
     }
 }

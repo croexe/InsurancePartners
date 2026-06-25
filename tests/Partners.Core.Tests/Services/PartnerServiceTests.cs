@@ -37,21 +37,21 @@ public class PartnerServiceTests
         request.ExternalCode = "EXT123456789";
 
         _partnerRepoMock
-            .Setup(r => r.ExternalCodeExistsAsync("EXT123456789"))
+            .Setup(r => r.ExternalCodeExistsAsync("EXT123456789", It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         var result = await _service.CreatePartnerAsync(request);
 
         result.Success.Should().BeFalse();
         result.Errors.Should().ContainSingle(e => e.Contains("EXT123456789"));
-        _partnerRepoMock.Verify(r => r.InsertPartnerAsync(It.IsAny<Partner>()), Times.Never);
+        _partnerRepoMock.Verify(r => r.InsertPartnerAsync(It.IsAny<Partner>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task CreateAsync_ValidRequest_ReturnsOkWithNewId()
     {
         _partnerRepoMock
-            .Setup(r => r.InsertPartnerAsync(It.IsAny<Partner>()))
+            .Setup(r => r.InsertPartnerAsync(It.IsAny<Partner>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(42);
 
         var result = await _service.CreatePartnerAsync(ValidRequest());
@@ -67,11 +67,11 @@ public class PartnerServiceTests
         request.ExternalCode = "EXT123456789";
 
         _partnerRepoMock
-            .Setup(r => r.ExternalCodeExistsAsync("EXT123456789"))
+            .Setup(r => r.ExternalCodeExistsAsync("EXT123456789", It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
         _partnerRepoMock
-            .Setup(r => r.InsertPartnerAsync(It.IsAny<Partner>()))
+            .Setup(r => r.InsertPartnerAsync(It.IsAny<Partner>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(1);
 
         var result = await _service.CreatePartnerAsync(request);
@@ -83,7 +83,7 @@ public class PartnerServiceTests
     public async Task GetByIdAsync_PartnerDoesNotExist_ReturnsNull()
     {
         _partnerRepoMock
-            .Setup(r => r.FetchPartnerByIdAsync(99))
+            .Setup(r => r.FetchPartnerByIdAsync(99, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Partner?)null);
 
         var result = await _service.GetPartnerDetailsByIdAsync(99);

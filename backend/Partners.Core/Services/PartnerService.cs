@@ -19,9 +19,9 @@ public class PartnerService : IPartnerService
         _policyRepository = policyRepository;
     }
 
-    public async Task<IEnumerable<PartnerListItemResponse>> GetAllPartnersAsync()
+    public async Task<IEnumerable<PartnerListItemResponse>> GetAllPartnersAsync(CancellationToken cancellationToken = default)
     {
-        var partners = await _partnerRepository.FetchAllPartnersAsync();
+        var partners = await _partnerRepository.FetchAllPartnersAsync(cancellationToken);
 
         return partners.Select(item => new PartnerListItemResponse
         {
@@ -37,15 +37,15 @@ public class PartnerService : IPartnerService
         });
     }
 
-    public async Task<PartnerDetailResponse?> GetPartnerDetailsByIdAsync(int id)
+    public async Task<PartnerDetailResponse?> GetPartnerDetailsByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        var partner = await _partnerRepository.FetchPartnerByIdAsync(id);
+        var partner = await _partnerRepository.FetchPartnerByIdAsync(id, cancellationToken);
         if (partner is null)
         {
             return null;
         }
 
-        var policies = await _policyRepository.FetchAllPoliciesByPartnerIdAsync(id);
+        var policies = await _policyRepository.FetchAllPoliciesByPartnerIdAsync(id, cancellationToken);
         var policyResponses = policies
             .Select(p => new PolicyResponse
             {
@@ -77,11 +77,11 @@ public class PartnerService : IPartnerService
         };
     }
 
-    public async Task<PartnerServiceResult> CreatePartnerAsync(CreatePartnerRequest request)
+    public async Task<PartnerServiceResult> CreatePartnerAsync(CreatePartnerRequest request, CancellationToken cancellationToken = default)
     {
         if (!string.IsNullOrWhiteSpace(request.ExternalCode))
         {
-            var exists = await _partnerRepository.ExternalCodeExistsAsync(request.ExternalCode);
+            var exists = await _partnerRepository.ExternalCodeExistsAsync(request.ExternalCode, cancellationToken);
             if (exists)
             {
                 return PartnerServiceResult.Fail($"ExternalCode '{request.ExternalCode}' is already in use.");
@@ -102,7 +102,7 @@ public class PartnerService : IPartnerService
             Gender = request.Gender!.Value
         };
 
-        var newId = await _partnerRepository.InsertPartnerAsync(partner);
+        var newId = await _partnerRepository.InsertPartnerAsync(partner, cancellationToken);
 
         return PartnerServiceResult.Ok(newId);
     }

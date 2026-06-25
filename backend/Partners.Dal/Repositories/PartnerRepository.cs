@@ -1,3 +1,4 @@
+using System.Data;
 using Dapper;
 using Partners.Core.Contracts;
 using Partners.Core.Models;
@@ -15,32 +16,38 @@ namespace Partners.Dal.Repositories
             _dbConnectionFactory = dbConnectionFactory;
         }
 
-        public async Task<IEnumerable<PartnerWithSummary>> FetchAllPartnersAsync()
+        public async Task<IEnumerable<PartnerWithSummary>> FetchAllPartnersAsync(CancellationToken cancellationToken = default)
         {
-            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
 
-            var rows = await connection.QueryAsync<PartnerRow>(
+            var command = new CommandDefinition(
                 "dbo.GetAllPartnersWithPolicySummeriesFirstServe",
-                commandType: System.Data.CommandType.StoredProcedure);
+                commandType: CommandType.StoredProcedure,
+                cancellationToken: cancellationToken);
+
+            var rows = await connection.QueryAsync<PartnerRow>(command);
 
             return rows.Select(row => row.ToPartnerWithSummary());
         }
 
-        public async Task<Partner?> FetchPartnerByIdAsync(int id)
+        public async Task<Partner?> FetchPartnerByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
 
-            var row = await connection.QuerySingleOrDefaultAsync<PartnerRow>(
+            var command = new CommandDefinition(
                 "dbo.GetPartnerById",
                 new { Id = id },
-                commandType: System.Data.CommandType.StoredProcedure);
+                commandType: CommandType.StoredProcedure,
+                cancellationToken: cancellationToken);
+
+            var row = await connection.QuerySingleOrDefaultAsync<PartnerRow>(command);
 
             return row?.ToPartner();
         }
 
-        public async Task<int> InsertPartnerAsync(Partner partner)
+        public async Task<int> InsertPartnerAsync(Partner partner, CancellationToken cancellationToken = default)
         {
-            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
 
             var parameters = new
             {
@@ -56,20 +63,26 @@ namespace Partners.Dal.Repositories
                 Gender = partner.Gender.ToString()
             };
 
-            return await connection.QuerySingleAsync<int>(
+            var command = new CommandDefinition(
                 "dbo.CreatePartner",
                 parameters,
-                commandType: System.Data.CommandType.StoredProcedure);
+                commandType: CommandType.StoredProcedure,
+                cancellationToken: cancellationToken);
+
+            return await connection.QuerySingleAsync<int>(command);
         }
 
-        public async Task<bool> ExternalCodeExistsAsync(string externalCode)
+        public async Task<bool> ExternalCodeExistsAsync(string externalCode, CancellationToken cancellationToken = default)
         {
-            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
 
-            var count = await connection.QuerySingleAsync<int>(
+            var command = new CommandDefinition(
                 "dbo.ExternalCodeExists",
                 new { ExternalCode = externalCode },
-                commandType: System.Data.CommandType.StoredProcedure);
+                commandType: CommandType.StoredProcedure,
+                cancellationToken: cancellationToken);
+
+            var count = await connection.QuerySingleAsync<int>(command);
 
             return count > 0;
         }

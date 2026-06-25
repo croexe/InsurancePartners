@@ -1,3 +1,4 @@
+using System.Data;
 using Dapper;
 using Partners.Core.Contracts;
 using Partners.Core.Models;
@@ -14,19 +15,22 @@ namespace Partners.Dal.Repositories
             _dbConnectionFactory = dbConnectionFactory;
         }
 
-        public async Task<IEnumerable<Policy>> FetchAllPoliciesByPartnerIdAsync(int partnerId)
+        public async Task<IEnumerable<Policy>> FetchAllPoliciesByPartnerIdAsync(int partnerId, CancellationToken cancellationToken = default)
         {
-            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
 
-            return await connection.QueryAsync<Policy>(
+            var command = new CommandDefinition(
                 "dbo.GetPoliciesByPartnerId",
                 new { PartnerId = partnerId },
-                commandType: System.Data.CommandType.StoredProcedure);
+                commandType: CommandType.StoredProcedure,
+                cancellationToken: cancellationToken);
+
+            return await connection.QueryAsync<Policy>(command);
         }
 
-        public async Task<int> InsertPolicyAsync(Policy policy)
+        public async Task<int> InsertPolicyAsync(Policy policy, CancellationToken cancellationToken = default)
         {
-            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
 
             var parameters = new
             {
@@ -35,20 +39,26 @@ namespace Partners.Dal.Repositories
                 policy.PartnerId
             };
 
-            return await connection.QuerySingleAsync<int>(
+            var command = new CommandDefinition(
                 "dbo.CreatePolicy",
                 parameters,
-                commandType: System.Data.CommandType.StoredProcedure);
+                commandType: CommandType.StoredProcedure,
+                cancellationToken: cancellationToken);
+
+            return await connection.QuerySingleAsync<int>(command);
         }
 
-        public async Task<PolicySummary> FetchPolicySummaryByPartnerIdAsync(int partnerId)
+        public async Task<PolicySummary> FetchPolicySummaryByPartnerIdAsync(int partnerId, CancellationToken cancellationToken = default)
         {
-            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
-            return await connection.QuerySingleAsync<PolicySummary>(
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
+
+            var command = new CommandDefinition(
                 "dbo.GetPolicySummaryByPartnerId",
                 new { PartnerId = partnerId },
-                commandType: System.Data.CommandType.StoredProcedure);
-        }
+                commandType: CommandType.StoredProcedure,
+                cancellationToken: cancellationToken);
 
+            return await connection.QuerySingleAsync<PolicySummary>(command);
+        }
     }
 }
