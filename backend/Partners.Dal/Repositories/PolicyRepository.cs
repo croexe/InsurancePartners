@@ -51,15 +51,5 @@ namespace Partners.Dal.Repositories
                 commandType: System.Data.CommandType.StoredProcedure);
         }
 
-        public async Task<IReadOnlyDictionary<int, PartnerPolicySummaryResponse>> GetSummariesForPartnerAsync()
-        {
-            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
-
-            var rows = await connection.QueryAsync<PartnerPolicySummaryResponse>(
-                "dbo.GetPartnerPolicySummaries",
-                commandType: System.Data.CommandType.StoredProcedure);
-
-            return rows.ToDictionary(r => r.PartnerId, r => r);
-        }
     }
 }

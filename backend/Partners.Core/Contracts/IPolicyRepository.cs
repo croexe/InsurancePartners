@@ -8,6 +8,5 @@ namespace Partners.Core.Contracts
         Task<IEnumerable<Policy>> FetchAllPoliciesByPartnerIdAsync(int partnerId);
         Task<int> InsertPolicyAsync(Policy policy);
         Task<PartnerPolicySummaryResponse> FetchPolicySummaryByPartnerIdAsync(int partnerId);
-        Task<IReadOnlyDictionary<int, PartnerPolicySummaryResponse>> GetSummariesForPartnerAsync();
     }
 }
