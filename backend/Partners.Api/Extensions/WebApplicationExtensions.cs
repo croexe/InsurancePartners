@@ -22,7 +22,13 @@ internal static class WebApplicationExtensions
 
         app.UseHttpsRedirection();
 
+        // UseRouting mora doci prije UseRateLimiter da endpoint-specifican limiter
+        // (RequireRateLimiting) vidi endpoint metadata.
+        app.UseRouting();
+
         app.UseCors("AllowFrontend");
+
+        app.UseRateLimiter();
 
         app.UseAuthentication();
         app.UseAuthorization();

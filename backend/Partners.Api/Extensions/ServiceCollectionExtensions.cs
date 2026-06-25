@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Partners.Api.ErrorHandling;
@@ -14,6 +15,7 @@ using Serilog;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 
 namespace Partners.Api.Extensions;
 
@@ -112,6 +114,29 @@ internal static class ServiceCollectionExtensions
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();
+            });
+        });
+
+        // Rate limiting za login endpoint — zastita od password-spraying napada.
+        // Limit je konfigurabilan i particioniran po IP-u. Config se cita lazy (na runtime)
+        // unutar policyja kako bi override-ovi iz okoline/testova bili vidljivi.
+        services.AddRateLimiter(options =>
+        {
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            options.AddPolicy("login", httpContext =>
+            {
+                var config = httpContext.RequestServices.GetRequiredService<IConfiguration>();
+                var permitLimit = config.GetValue<int?>("RateLimiting:Login:PermitLimit") ?? 10;
+                var windowSeconds = config.GetValue<int?>("RateLimiting:Login:WindowSeconds") ?? 60;
+
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = permitLimit,
+                        Window = TimeSpan.FromSeconds(windowSeconds)
+                    });
             });
         });
 

@@ -15,6 +15,10 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     public Mock<IPolicyService> PolicyServiceMock { get; } = new();
     public Mock<IPartnerNotifier> PartnerNotifierMock { get; } = new();
 
+    // Visok limit u testovima da visestruki login pozivi ne udare u 429.
+    // Test za 429 nadjacava ovo svojstvo (jedini izvor vrijednosti — bez sukoba config izvora).
+    protected virtual int LoginRateLimitPermits => 1000;
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         // Koristimo LocalDB s testnom bazom umjesto produkcijske — MigrateAsync() radi normalno,
@@ -24,7 +28,9 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["ConnectionStrings:InsurancePartnersDb"] =
-                    "Server=(localdb)\\MSSQLLocalDB;Database=WienerPartnersTest;Trusted_Connection=True;TrustServerCertificate=True;"
+                    "Server=(localdb)\\MSSQLLocalDB;Database=WienerPartnersTest;Trusted_Connection=True;TrustServerCertificate=True;",
+                ["RateLimiting:Login:PermitLimit"] = LoginRateLimitPermits.ToString(),
+                ["RateLimiting:Login:WindowSeconds"] = "60"
             });
         });
 

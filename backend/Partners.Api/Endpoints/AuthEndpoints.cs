@@ -53,6 +53,7 @@ public static class AuthEndpoints
             return Results.Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
         })
         .AllowAnonymous()
+        .RequireRateLimiting("login")
         .Produces<object>()
         .ProducesProblem(StatusCodes.Status401Unauthorized);
 
