@@ -110,14 +110,6 @@ public class PartnerService : IPartnerService
     private static bool IsFlagged(int policyCount, decimal totalAmount) =>
         PartnerFlagRules.IsFlagged(policyCount, totalAmount);
 
-    private static (int PolicyCount, decimal TotalAmount) GetSummaryOrDefault(
-        IReadOnlyDictionary<int, PartnerPolicySummaryResponse> summaries, int partnerId)
-    {
-        return summaries.TryGetValue(partnerId, out var summary)
-            ? (summary.PolicyCount, summary.TotalAmount)
-            : (0, 0m);
-    }
-
     private static string SetPartnerType(PartnerType partnerType) =>
         partnerType == PartnerType.Personal ? "Privatna osoba" : "Pravna osoba";
 }

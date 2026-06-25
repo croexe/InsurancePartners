@@ -1,6 +1,5 @@
 using Dapper;
 using Partners.Core.Contracts;
-using Partners.Core.DTOs.Responses;
 using Partners.Core.Models;
 using Partners.Dal.Database;
 
@@ -42,10 +41,10 @@ namespace Partners.Dal.Repositories
                 commandType: System.Data.CommandType.StoredProcedure);
         }
 
-        public async Task<PartnerPolicySummaryResponse> FetchPolicySummaryByPartnerIdAsync(int partnerId)
+        public async Task<PolicySummary> FetchPolicySummaryByPartnerIdAsync(int partnerId)
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
-            return await connection.QuerySingleAsync<PartnerPolicySummaryResponse>(
+            return await connection.QuerySingleAsync<PolicySummary>(
                 "dbo.GetPolicySummaryByPartnerId",
                 new { PartnerId = partnerId },
                 commandType: System.Data.CommandType.StoredProcedure);

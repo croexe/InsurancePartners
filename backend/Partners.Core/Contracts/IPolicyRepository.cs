@@ -1,4 +1,3 @@
-using Partners.Core.DTOs.Responses;
 using Partners.Core.Models;
 
 namespace Partners.Core.Contracts
@@ -7,6 +6,6 @@ namespace Partners.Core.Contracts
     {
         Task<IEnumerable<Policy>> FetchAllPoliciesByPartnerIdAsync(int partnerId);
         Task<int> InsertPolicyAsync(Policy policy);
-        Task<PartnerPolicySummaryResponse> FetchPolicySummaryByPartnerIdAsync(int partnerId);
+        Task<PolicySummary> FetchPolicySummaryByPartnerIdAsync(int partnerId);
     }
 }

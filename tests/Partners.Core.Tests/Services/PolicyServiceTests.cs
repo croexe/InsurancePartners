@@ -2,7 +2,6 @@ using FluentAssertions;
 using Moq;
 using Partners.Core.Contracts;
 using Partners.Core.DTOs.Requests;
-using Partners.Core.DTOs.Responses;
 using Partners.Core.Models;
 using Partners.Core.Services;
 
@@ -53,7 +52,7 @@ public class PolicyServiceTests
 
         _policyRepoMock
             .Setup(r => r.FetchPolicySummaryByPartnerIdAsync(1))
-            .ReturnsAsync(new PartnerPolicySummaryResponse(1, 1, 500m));
+            .ReturnsAsync(new PolicySummary(1, 1, 500m));
 
         var result = await _service.CreatePolicyAsync(ValidRequest());
 
@@ -76,7 +75,7 @@ public class PolicyServiceTests
 
         _policyRepoMock
             .Setup(r => r.FetchPolicySummaryByPartnerIdAsync(1))
-            .ReturnsAsync(new PartnerPolicySummaryResponse(1, 6, 9000m));
+            .ReturnsAsync(new PolicySummary(1, 6, 9000m));
 
         var result = await _service.CreatePolicyAsync(ValidRequest());
 
