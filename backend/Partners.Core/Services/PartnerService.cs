@@ -21,7 +21,7 @@ public class PartnerService : IPartnerService
 
     public async Task<IEnumerable<PartnerListItemResponse>> GetAllPartnersAsync()
     {
-        var partners = await _partnerRepository.GetAllPartnersAsync();
+        var partners = await _partnerRepository.FetchAllPartnersAsync();
 
         return partners.Select(partner => new PartnerListItemResponse
         {
@@ -39,13 +39,13 @@ public class PartnerService : IPartnerService
 
     public async Task<PartnerDetailResponse?> GetPartnerDetailsByIdAsync(int id)
     {
-        var partner = await _partnerRepository.GetPartnerByIdAsync(id);
+        var partner = await _partnerRepository.FetchPartnerByIdAsync(id);
         if (partner is null)
         {
             return null;
         }
 
-        var policies = await _policyRepository.GetAllPoliciesByPartnerIdAsync(id);
+        var policies = await _policyRepository.FetchAllPoliciesByPartnerIdAsync(id);
         var policyResponses = policies
             .Select(p => new PolicyResponse
             {
@@ -102,7 +102,7 @@ public class PartnerService : IPartnerService
             Gender = request.Gender!.Value
         };
 
-        var newId = await _partnerRepository.CreatePartnerAsync(partner);
+        var newId = await _partnerRepository.InsertPartnerAsync(partner);
 
         return PartnerServiceResult.Ok(newId);
     }

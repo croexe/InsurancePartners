@@ -31,29 +31,29 @@ public class PolicyServiceTests
     public async Task CreateAsync_PartnerDoesNotExist_ReturnsFail()
     {
         _partnerRepoMock
-            .Setup(r => r.GetPartnerByIdAsync(1))
+            .Setup(r => r.FetchPartnerByIdAsync(1))
             .ReturnsAsync((Partner?)null);
 
         var result = await _service.CreatePolicyAsync(ValidRequest());
 
         result.Success.Should().BeFalse();
         result.Errors.Should().ContainSingle(e => e.Contains("1"));
-        _policyRepoMock.Verify(r => r.CreatePolicyAsync(It.IsAny<Policy>()), Times.Never);
+        _policyRepoMock.Verify(r => r.InsertPolicyAsync(It.IsAny<Policy>()), Times.Never);
     }
 
     [Fact]
     public async Task CreateAsync_ValidRequest_ReturnsOkWithPolicyResponse()
     {
         _partnerRepoMock
-            .Setup(r => r.GetPartnerByIdAsync(1))
+            .Setup(r => r.FetchPartnerByIdAsync(1))
             .ReturnsAsync(new Partner { Id = 1 });
 
         _policyRepoMock
-            .Setup(r => r.CreatePolicyAsync(It.IsAny<Policy>()))
+            .Setup(r => r.InsertPolicyAsync(It.IsAny<Policy>()))
             .ReturnsAsync(10);
 
         _policyRepoMock
-            .Setup(r => r.GetPolicySummaryByPartnerIdAsync(1))
+            .Setup(r => r.FetchPolicySummaryByPartnerIdAsync(1))
             .ReturnsAsync(new PartnerPolicySummaryResponse(1, 1, 500m));
 
         _notifierMock
@@ -72,15 +72,15 @@ public class PolicyServiceTests
     public async Task CreateAsync_ValidRequest_NotifiesSignalR()
     {
         _partnerRepoMock
-            .Setup(r => r.GetPartnerByIdAsync(1))
+            .Setup(r => r.FetchPartnerByIdAsync(1))
             .ReturnsAsync(new Partner { Id = 1 });
 
         _policyRepoMock
-            .Setup(r => r.CreatePolicyAsync(It.IsAny<Policy>()))
+            .Setup(r => r.InsertPolicyAsync(It.IsAny<Policy>()))
             .ReturnsAsync(1);
 
         _policyRepoMock
-            .Setup(r => r.GetPolicySummaryByPartnerIdAsync(1))
+            .Setup(r => r.FetchPolicySummaryByPartnerIdAsync(1))
             .ReturnsAsync(new PartnerPolicySummaryResponse(1, 1, 500m));
 
         _notifierMock

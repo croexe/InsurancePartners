@@ -44,14 +44,14 @@ public class PartnerServiceTests
 
         result.Success.Should().BeFalse();
         result.Errors.Should().ContainSingle(e => e.Contains("EXT123456789"));
-        _partnerRepoMock.Verify(r => r.CreatePartnerAsync(It.IsAny<Partner>()), Times.Never);
+        _partnerRepoMock.Verify(r => r.InsertPartnerAsync(It.IsAny<Partner>()), Times.Never);
     }
 
     [Fact]
     public async Task CreateAsync_ValidRequest_ReturnsOkWithNewId()
     {
         _partnerRepoMock
-            .Setup(r => r.CreatePartnerAsync(It.IsAny<Partner>()))
+            .Setup(r => r.InsertPartnerAsync(It.IsAny<Partner>()))
             .ReturnsAsync(42);
 
         var result = await _service.CreatePartnerAsync(ValidRequest());
@@ -71,7 +71,7 @@ public class PartnerServiceTests
             .ReturnsAsync(false);
 
         _partnerRepoMock
-            .Setup(r => r.CreatePartnerAsync(It.IsAny<Partner>()))
+            .Setup(r => r.InsertPartnerAsync(It.IsAny<Partner>()))
             .ReturnsAsync(1);
 
         var result = await _service.CreatePartnerAsync(request);
@@ -83,7 +83,7 @@ public class PartnerServiceTests
     public async Task GetByIdAsync_PartnerDoesNotExist_ReturnsNull()
     {
         _partnerRepoMock
-            .Setup(r => r.GetPartnerByIdAsync(99))
+            .Setup(r => r.FetchPartnerByIdAsync(99))
             .ReturnsAsync((Partner?)null);
 
         var result = await _service.GetPartnerDetailsByIdAsync(99);

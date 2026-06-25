@@ -22,7 +22,7 @@ public class PolicyService : IPolicyService
 
     public async Task<PolicyServiceResult> CreatePolicyAsync(CreatePolicyRequest request)
     {
-        var partner = await _partnerRepository.GetPartnerByIdAsync(request.PartnerId!.Value);
+        var partner = await _partnerRepository.FetchPartnerByIdAsync(request.PartnerId!.Value);
         if (partner is null)
         {
             return PolicyServiceResult.Fail($"Partner with Id '{request.PartnerId}' does not exist.");
@@ -35,7 +35,7 @@ public class PolicyService : IPolicyService
             PartnerId = request.PartnerId!.Value
         };
 
-        var newId = await _policyRepository.CreatePolicyAsync(policy);
+        var newId = await _policyRepository.InsertPolicyAsync(policy);
 
         var response = new PolicyResponse
         {
@@ -45,7 +45,7 @@ public class PolicyService : IPolicyService
             PartnerId = policy.PartnerId
         };
 
-        var summary = await _policyRepository.GetPolicySummaryByPartnerIdAsync(policy.PartnerId);
+        var summary = await _policyRepository.FetchPolicySummaryByPartnerIdAsync(policy.PartnerId);
         var isFlagged = PartnerFlagRules.IsFlagged(summary.PolicyCount, summary.TotalAmount);
 
         await _partnerNotifier.NotifyPartnerFlagChangedAsync(policy.PartnerId, isFlagged);

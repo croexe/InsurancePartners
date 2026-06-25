@@ -5,8 +5,9 @@ namespace Partners.Core.Contracts
 {
     public interface IPolicyRepository
     {
-        Task<IEnumerable<Policy>> GetAllPoliciesByPartnerIdAsync(int partnerId);
-        Task<int> CreatePolicyAsync(Policy policy);
-        Task<PartnerPolicySummaryResponse> GetPolicySummaryByPartnerIdAsync(int partnerId);
+        Task<IEnumerable<Policy>> FetchAllPoliciesByPartnerIdAsync(int partnerId);
+        Task<int> InsertPolicyAsync(Policy policy);
+        Task<PartnerPolicySummaryResponse> FetchPolicySummaryByPartnerIdAsync(int partnerId);
+        Task<IReadOnlyDictionary<int, PartnerPolicySummaryResponse>> GetSummariesForPartnerAsync();
     }
 }

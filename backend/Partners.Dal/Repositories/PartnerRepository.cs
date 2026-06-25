@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Partners.Core.Contracts;
 using Partners.Core.Models;
 using Partners.Dal.Database;
@@ -15,7 +15,7 @@ namespace Partners.Dal.Repositories
             _dbConnectionFactory = dbConnectionFactory;
         }
 
-        public async Task<IEnumerable<Partner>> GetAllPartnersAsync()
+        public async Task<IEnumerable<Partner>> FetchAllPartnersAsync()
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 
@@ -26,7 +26,7 @@ namespace Partners.Dal.Repositories
             return rows.Select(row => row.ToPartner());
         }
 
-        public async Task<Partner?> GetPartnerByIdAsync(int id)
+        public async Task<Partner?> FetchPartnerByIdAsync(int id)
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 
@@ -38,7 +38,7 @@ namespace Partners.Dal.Repositories
             return row?.ToPartner();
         }
 
-        public async Task<int> CreatePartnerAsync(Partner partner)
+        public async Task<int> InsertPartnerAsync(Partner partner)
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 

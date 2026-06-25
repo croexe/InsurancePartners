@@ -15,7 +15,7 @@ namespace Partners.Dal.Repositories
             _dbConnectionFactory = dbConnectionFactory;
         }
 
-        public async Task<IEnumerable<Policy>> GetAllPoliciesByPartnerIdAsync(int partnerId)
+        public async Task<IEnumerable<Policy>> FetchAllPoliciesByPartnerIdAsync(int partnerId)
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 
@@ -25,7 +25,7 @@ namespace Partners.Dal.Repositories
                 commandType: System.Data.CommandType.StoredProcedure);
         }
 
-        public async Task<int> CreatePolicyAsync(Policy policy)
+        public async Task<int> InsertPolicyAsync(Policy policy)
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
 
@@ -42,13 +42,24 @@ namespace Partners.Dal.Repositories
                 commandType: System.Data.CommandType.StoredProcedure);
         }
 
-        public async Task<PartnerPolicySummaryResponse> GetPolicySummaryByPartnerIdAsync(int partnerId)
+        public async Task<PartnerPolicySummaryResponse> FetchPolicySummaryByPartnerIdAsync(int partnerId)
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
             return await connection.QuerySingleAsync<PartnerPolicySummaryResponse>(
                 "dbo.GetPolicySummaryByPartnerId",
                 new { PartnerId = partnerId },
                 commandType: System.Data.CommandType.StoredProcedure);
+        }
+
+        public async Task<IReadOnlyDictionary<int, PartnerPolicySummaryResponse>> GetSummariesForPartnerAsync()
+        {
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+
+            var rows = await connection.QueryAsync<PartnerPolicySummaryResponse>(
+                "dbo.GetPartnerPolicySummaries",
+                commandType: System.Data.CommandType.StoredProcedure);
+
+            return rows.ToDictionary(r => r.PartnerId, r => r);
         }
     }
 }
