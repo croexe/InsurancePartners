@@ -1,56 +1,89 @@
 const API_BASE_URL = "https://localhost:7146/api";
+const REQUEST_TIMEOUT_MS = 15000;
 
-async function apiRequest(method, path, body) {
+class ApiError extends Error {
+    constructor(status, errors) {
+        super(errors[0] ?? "Nepoznata greška.");
+        this.name = "ApiError";
+        this.status = status;
+        this.errors = errors;
+    }
+}
+
+function buildHeaders(hasBody) {
+    const headers = new Headers();
+    if (hasBody) {
+        headers.set("Content-Type", "application/json");
+    }
     const token = auth.getToken();
-    const headers = { "Content-Type": "application/json" };
-
     if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
+        headers.set("Authorization", `Bearer ${token}`);
     }
+    return headers;
+}
 
-    const response = await fetch(`${API_BASE_URL}${path}`, {
-        method,
-        headers,
-        body: body ? JSON.stringify(body) : undefined
-    });
-
-    if (response.status === 401) {
-        auth.logout();
-        return;
-    }
-
+async function parseResponseBody(response) {
     if (response.status === 204) {
         return null;
     }
-
-    const data = await response.json().catch(() => null);
-
-    if (!response.ok) {
-        const errors = extractErrorMessages(data);
-        throw { status: response.status, errors };
+    const contentType = response.headers.get("content-type") ?? "";
+    if (contentType.includes("application/json")) {
+        return response.json().catch(() => null);
     }
-
-    return data;
+    return response.text();
 }
 
 function extractErrorMessages(data) {
     if (!data) {
-        return ["Unknown error occured."];
+        return ["Nepoznata greška."];
     }
-
     if (Array.isArray(data.errors)) {
         return data.errors;
     }
-
     if (data.errors && typeof data.errors === "object") {
         return Object.values(data.errors).flat();
     }
-
     if (data.message) {
         return [data.message];
     }
+    return ["Nepoznata greška."];
+}
 
-    return ["Unknown error occured."];
+async function apiRequest(method, path, body) {
+    const hasBody = body !== undefined && body !== null;
+
+    const request = new Request(`${API_BASE_URL}${path}`, {
+        method,
+        headers: buildHeaders(hasBody),
+        body: hasBody ? JSON.stringify(body) : undefined,
+        mode: "cors",
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
+    });
+
+    let response;
+    try {
+        response = await fetch(request);
+    } catch (error) {
+        if (error.name === "TimeoutError") {
+            throw new ApiError(0, ["Zahtjev je istekao."]);
+        }
+        throw new ApiError(0, ["Nije moguće dohvatiti podatke (mreža)."]);
+    }
+
+    if (response.status === 401) {
+        if (auth.getToken()) {
+            auth.logout();
+        }
+        throw new ApiError(401, ["Sesija je istekla. Prijavite se ponovno."]);
+    }
+
+    const data = await parseResponseBody(response);
+
+    if (!response.ok) {
+        throw new ApiError(response.status, extractErrorMessages(data));
+    }
+
+    return data;
 }
 
 const api = {
