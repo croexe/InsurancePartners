@@ -1,11 +1,8 @@
-﻿// policy-dialog.js - dijalog za unos nove police, vezan na partnera
-// odabranog iz dropdowna (popunjenog iz currentPartners, vidi partner-list.js).
-
 function populatePolicyPartnerDropdown() {
     const select = document.getElementById("policyPartnerId");
     select.innerHTML = '<option value="" disabled selected>Odaberite partnera...</option>' +
-        currentPartners.map(function (p) {
-            return '<option value="' + p.id + '">' + escapeHtml(p.fullName) + "</option>";
+        currentPartners.map(function (partner) {
+            return '<option value="' + partner.id + '">' + escapeHtml(partner.fullName) + "</option>";
         }).join("");
 }
 
@@ -34,11 +31,21 @@ async function submitPolicyForm(e) {
 
     clearAlert("policyAlert");
 
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.textContent = "Spremanje...";
+
     try {
         await api.createPolicy(request);
         $("#policyDialog").modal("hide");
         await loadPartners();
-    } catch (err) {
-        showAlert("policyAlert", (err.errors || ["Error saving policy."]).join("<br>"));
+    } catch (error) {
+        if (error instanceof ApiError && error.status === 401) {
+            return;
+        }
+        showAlert("policyAlert", (error.errors || ["Greška pri spremanju police."]).join("<br>"));
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Spremi policu";
     }
 }
