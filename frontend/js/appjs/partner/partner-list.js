@@ -17,7 +17,7 @@ async function loadPartners() {
         if (error instanceof ApiError && error.status === 401) {
             return;
         }
-        showAlert("listAlert", (error.errors || ["Greška pri dohvaćanju partnera."]).join("<br>"));
+        showAlert("listAlert", error.errors || ["Greška pri dohvaćanju partnera."]);
     }
 }
 

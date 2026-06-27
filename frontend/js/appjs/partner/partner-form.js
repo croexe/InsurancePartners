@@ -68,7 +68,7 @@ async function submitPartnerForm(e) {
         if (error instanceof ApiError && error.status === 401) {
             return;
         }
-        showAlert("formAlert", (error.errors || ["Greška pri spremanju partnera."]).join("<br>"));
+        showAlert("formAlert", error.errors || ["Greška pri spremanju partnera."]);
     } finally {
         submitButton.disabled = false;
         submitButton.textContent = "Spremi partnera";

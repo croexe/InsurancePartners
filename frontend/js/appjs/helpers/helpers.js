@@ -3,15 +3,17 @@
     document.getElementById(viewId).classList.remove("d-none");
 }
 
-function showAlert(containerId, message, type = "danger") {
+function showAlert(containerId, messages, type = "danger") {
     const container = document.getElementById(containerId);
-    container.innerHTML = `
-        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-            ${message}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>`;
+    const list = Array.isArray(messages) ? messages : [messages];
+    const safeMessage = list.map(escapeHtml).join("<br>");
+    container.innerHTML =
+        '<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">' +
+        safeMessage +
+        '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+        '<span aria-hidden="true">&times;</span>' +
+        "</button>" +
+        "</div>";
 }
 
 function clearAlert(containerId) {

@@ -43,7 +43,7 @@ async function submitPolicyForm(e) {
         if (error instanceof ApiError && error.status === 401) {
             return;
         }
-        showAlert("policyAlert", (error.errors || ["Greška pri spremanju police."]).join("<br>"));
+        showAlert("policyAlert", error.errors || ["Greška pri spremanju police."]);
     } finally {
         submitButton.disabled = false;
         submitButton.textContent = "Spremi policu";
