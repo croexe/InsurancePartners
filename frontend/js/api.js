@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://localhost:7146/api";
+const API_BASE_URL = window.APP_CONFIG.apiBaseUrl;
 const REQUEST_TIMEOUT_MS = 15000;
 
 class ApiError extends Error {

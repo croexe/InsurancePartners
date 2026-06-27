@@ -1,4 +1,4 @@
-const HUB_URL = "https://localhost:7146/hubs/partners";
+const HUB_URL = window.APP_CONFIG.hubUrl;
 
 const partnerHubConnection = new signalR.HubConnectionBuilder()
     .withUrl(HUB_URL, {
