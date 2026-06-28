@@ -1,6 +1,8 @@
+const DEFAULT_ERROR_MESSAGE = "Nepoznata greska." 
+
 class ApiError extends Error {
     constructor(status, errors) {
-        super(errors[0] ?? "Nepoznata greška.");
+        super(errors[0] ?? DEFAULT_ERROR_MESSAGE);
         this.name = "ApiError";
         this.status = status;
         this.errors = errors;
@@ -9,7 +11,7 @@ class ApiError extends Error {
 
 function extractErrorMessages(data) {
     if (!data) {
-        return ["Nepoznata greška."];
+        return [DEFAULT_ERROR_MESSAGE];
     }
     if (Array.isArray(data.errors)) {
         return data.errors;
@@ -20,5 +22,5 @@ function extractErrorMessages(data) {
     if (data.message) {
         return [data.message];
     }
-    return ["Nepoznata greška."];
+    return [DEFAULT_ERROR_MESSAGE];
 }
