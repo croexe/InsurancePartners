@@ -1,8 +1,6 @@
-const DEFAULT_ERROR_MESSAGE = "Nepoznata greska." 
-
 class ApiError extends Error {
     constructor(status, errors) {
-        super(errors[0] ?? DEFAULT_ERROR_MESSAGE);
+        super(errors[0] ?? ERROR_MESSAGES.unknown);
         this.name = "ApiError";
         this.status = status;
         this.errors = errors;
@@ -11,7 +9,7 @@ class ApiError extends Error {
 
 function extractErrorMessages(data) {
     if (!data) {
-        return [DEFAULT_ERROR_MESSAGE];
+        return [ERROR_MESSAGES.unknown];
     }
     if (Array.isArray(data.errors)) {
         return data.errors;
@@ -22,5 +20,5 @@ function extractErrorMessages(data) {
     if (data.message) {
         return [data.message];
     }
-    return [DEFAULT_ERROR_MESSAGE];
+    return [ERROR_MESSAGES.unknown];
 }

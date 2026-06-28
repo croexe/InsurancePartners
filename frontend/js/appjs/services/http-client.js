@@ -39,17 +39,17 @@ async function apiRequest(method, path, body) {
     try {
         response = await fetch(request);
     } catch (error) {
-        if (error.name === "TimeoutError") {
-            throw new ApiError(0, ["Zahtjev je istekao."]);          // ← iz errors.js
+        if (error.name === ERROR_MESSAGES.timeout) {
+            throw new ApiError(0, [ERROR_MESSAGES.requestExpired]);          // ← iz errors.js
         }
-        throw new ApiError(0, ["Nije moguće dohvatiti podatke (mreža)."]);
+        throw new ApiError(0, [ERROR_MESSAGES.network]);
     }
 
     if (response.status === 401) {
         if (auth.getToken()) {
             auth.logout();
         }
-        throw new ApiError(401, ["Sesija je istekla. Prijavite se ponovno."]);
+        throw new ApiError(401, [ERROR_MESSAGES.sessionExpired]);
     }
 
     const data = await parseResponseBody(response);
