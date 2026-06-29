@@ -1,9 +1,9 @@
-﻿function showView(viewId) {
+﻿export function showView(viewId) {
     document.querySelectorAll(".view").forEach((el) => el.classList.add("d-none"));
     document.getElementById(viewId).classList.remove("d-none");
 }
 
-function showAlert(containerId, messages, type = "danger") {
+export function showAlert(containerId, messages, type = "danger") {
     const container = document.getElementById(containerId);
     const list = Array.isArray(messages) ? messages : [messages];
     const safeMessage = list.map(escapeHtml).join("<br>");
@@ -16,11 +16,11 @@ function showAlert(containerId, messages, type = "danger") {
         "</div>";
 }
 
-function clearAlert(containerId) {
+export function clearAlert(containerId) {
     document.getElementById(containerId).innerHTML = "";
 }
 
-function escapeHtml(value) {
+export function escapeHtml(value) {
     const div = document.createElement("div");
     div.textContent = value == null ? "" : value;
     return div.innerHTML;

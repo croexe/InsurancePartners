@@ -1,4 +1,9 @@
-﻿function resetPartnerForm() {
+﻿import { clearAlert, showView, showAlert } from "../helpers/helpers.js"
+import { api } from "../../api.js";
+import { ApiError } from "../errors/apiError.js";
+import { loadPartners, highlightNewPartnerRow } from "../partner/partner-list.js"
+
+export function resetPartnerForm() {
     const form = document.getElementById("partnerForm");
     form.reset();
     form.classList.remove("was-validated");
@@ -29,7 +34,7 @@ function validateOptionalPartnerFields() {
     return allValid;
 }
 
-async function submitPartnerForm(e) {
+export async function submitPartnerForm(e) {
     e.preventDefault();
     const form = e.target;
 

@@ -1,4 +1,4 @@
-function createPaginator(options) {
+export function createPaginator(options) {
     const pageSize = options.pageSize;
     const infoElementId = options.infoElementId;
     const controlsElementId = options.controlsElementId;

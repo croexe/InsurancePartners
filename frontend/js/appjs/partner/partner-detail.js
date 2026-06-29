@@ -1,3 +1,8 @@
+import { createPaginator } from "../helpers/pagination.js";
+import { escapeHtml,showAlert } from "../helpers/helpers.js";
+import { api } from "../../api.js";
+import { ApiError } from "../errors/apiError.js";
+
 let currentModalPolicies = [];
 
 const policyPaginator = createPaginator({
@@ -9,7 +14,7 @@ const policyPaginator = createPaginator({
     onRender: renderPolicyRows
 });
 
-async function openPartnerDetail(id) {
+export async function openPartnerDetail(id) {
     try {
         const partner = await api.getPartnerById(id);
         document.getElementById("partnerDetailTitle").textContent = partner.fullName;

@@ -1,4 +1,7 @@
-const HUB_URL = window.APP_CONFIG.hubUrl;
+import { APP_CONFIG } from "../config/config.js"
+import { auth } from "../config/auth.js"
+
+const HUB_URL = APP_CONFIG.hubUrl;
 
 const partnerHubConnection = new signalR.HubConnectionBuilder()
     .withUrl(HUB_URL, {
@@ -24,12 +27,12 @@ partnerHubConnection.onreconnecting(() => setConnectionStatus("Ponovno spajanje.
 partnerHubConnection.onreconnected(() => setConnectionStatus("Uživo", "is-live"));
 partnerHubConnection.onclose(() => setConnectionStatus("Veza prekinuta", "is-down"));
 
-function onPartnerFlagChanged(callback) {
+export function onPartnerFlagChanged(callback) {
     partnerHubConnection.on("PartnerFlagChanged", callback);
     return () => partnerHubConnection.off("PartnerFlagChanged", callback);
 }
 
-async function startHub() {
+export async function startHub() {
     if (partnerHubConnection.state !== signalR.HubConnectionState.Disconnected) {
         return;
     }

@@ -1,4 +1,4 @@
-window.APP_CONFIG = {
+export const APP_CONFIG = {
     apiBaseUrl: "/api",
     hubUrl: "/hubs/partners"
 };

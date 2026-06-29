@@ -7,7 +7,7 @@
     document.getElementById(targetId).innerHTML = html;
 }
 
-async function loadAllPartials() {
+export async function loadAllPartials() {
     await Promise.all([
         loadPartial("partial-partner-list", "partials/partner/partner-list.html"),
         loadPartial("partial-partner-form", "partials/partner/partner-form.html"),

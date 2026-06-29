@@ -1,4 +1,4 @@
-const ERROR_MESSAGES = {
+export const ERROR_MESSAGES = {
 unknown : 'Nepoznata pogreska.',
 timeout : 'Vrijeme je isteklo.',
 requestExpired : 'Zahtjev je istekao.',

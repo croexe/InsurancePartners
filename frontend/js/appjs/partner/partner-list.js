@@ -1,3 +1,10 @@
+import { createPaginator } from "../helpers/pagination.js";
+import { escapeHtml,showAlert } from "../helpers/helpers.js";
+import { api } from "../../api.js";
+import { ApiError } from "../errors/apiError.js";
+import { openPartnerDetail } from "./partner-detail.js";
+import { onPartnerFlagChanged } from "../services/signalr-client.js";
+
 let currentPartners = [];
 
 const partnerPaginator = createPaginator({
@@ -9,7 +16,7 @@ const partnerPaginator = createPaginator({
     onRender: renderPartnerRows
 });
 
-async function loadPartners() {
+export async function loadPartners() {
     try {
         currentPartners = await api.getPartners();
         partnerPaginator.setItems(currentPartners);
@@ -52,7 +59,7 @@ function renderPartnerRows(pagePartners) {
     });
 }
 
-function highlightNewPartnerRow(partnerId) {
+export function highlightNewPartnerRow(partnerId) {
     setTimeout(() => {
         const row = document.querySelector('.partner-row[data-id="' + partnerId + '"]');
         if (row) {
@@ -61,7 +68,7 @@ function highlightNewPartnerRow(partnerId) {
     }, 50);
 }
 
-function wireSignalRListener() {
+export function wireSignalRListener() {
     onPartnerFlagChanged(function (data) {
         const partner = currentPartners.find(function (candidate) { return candidate.id === data.partnerId; });
         if (partner) {

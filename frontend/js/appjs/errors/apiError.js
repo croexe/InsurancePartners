@@ -1,4 +1,6 @@
-class ApiError extends Error {
+import { ERROR_MESSAGES } from "./error-messages.js";
+
+export class ApiError extends Error {
     constructor(status, errors) {
         super(errors[0] ?? ERROR_MESSAGES.unknown);
         this.name = "ApiError";
@@ -7,7 +9,7 @@ class ApiError extends Error {
     }
 }
 
-function extractErrorMessages(data) {
+export function extractErrorMessages(data) {
     if (!data) {
         return [ERROR_MESSAGES.unknown];
     }

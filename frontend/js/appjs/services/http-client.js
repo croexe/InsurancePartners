@@ -1,4 +1,9 @@
-const API_BASE_URL = window.APP_CONFIG.apiBaseUrl;
+import { APP_CONFIG } from "../config/config.js"
+import { ApiError, extractErrorMessages } from "../errors/apiError.js";
+import { auth } from "../config/auth.js";
+import { ERROR_MESSAGES } from "../errors/error-messages.js";
+
+const API_BASE_URL = APP_CONFIG.apiBaseUrl;
 const REQUEST_TIMEOUT_MS = 15000;
 
 function buildHeaders(hasBody) {
@@ -24,7 +29,7 @@ async function parseResponseBody(response) {
     return response.text();
 }
 
-async function apiRequest(method, path, body) {
+export async function apiRequest(method, path, body) {
     const hasBody = body !== undefined && body !== null;
 
     const request = new Request(`${API_BASE_URL}${path}`, {
@@ -39,7 +44,7 @@ async function apiRequest(method, path, body) {
     try {
         response = await fetch(request);
     } catch (error) {
-        if (error.name === ERROR_MESSAGES.timeout) {
+        if (error.name === "TimeoutError") {
             throw new ApiError(0, [ERROR_MESSAGES.requestExpired]);          // ← iz errors.js
         }
         throw new ApiError(0, [ERROR_MESSAGES.network]);

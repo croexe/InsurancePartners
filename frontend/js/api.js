@@ -1,4 +1,6 @@
-const api = {
+import { apiRequest } from "../js/appjs/services/http-client.js"
+
+export const api = {
     login: (email, password) => apiRequest("POST", "/auth/login", { email, password }),
     getPartners: () => apiRequest("GET", "/partners"),
     getPartnerById: (id) => apiRequest("GET", `/partners/${id}`),

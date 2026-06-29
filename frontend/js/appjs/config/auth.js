@@ -11,7 +11,7 @@ function decodeJwt(token) {
     }
 }
 
-const auth = {
+export const auth = {
     getToken() {
         return localStorage.getItem(TOKEN_KEY);
     },
