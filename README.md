@@ -5,7 +5,7 @@ Web aplikacija za upravljanje partnerima i njihovim policama osiguranja.
 ## Tehnologije
 
 - **Backend:** ASP.NET Core 10 Minimal API, Dapper, EF Core (Identity), SignalR, Serilog, FluentValidation, JWT Bearer
-- **Frontend:** Vanilla JS, Bootstrap 4, SignalR JS klijent
+- **Frontend:** JavaScript (ES moduli) + Vite, Bootstrap 4, SignalR JS klijent
 - **Baza:** SQL Server LocalDB
 - **Testovi:** xUnit, Moq, FluentAssertions
 
@@ -15,7 +15,7 @@ Web aplikacija za upravljanje partnerima i njihovim policama osiguranja.
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - SQL Server LocalDB (dolazi s Visual Studio instalacijom)
-- Node.js (za pokretanje frontenda putem `npx serve`)
+- Node.js (za Vite — dev server i build frontenda)
 - SSMS ili Azure Data Studio (za pokretanje SQL skripte)
 
 ---
@@ -84,16 +84,24 @@ Pri prvom pokretanju aplikacija automatski kreira korisnika:
 
 ## Frontend
 
+Preduvjet: Node.js. Backend mora raditi na `:7146` (Vite proxy prosljeđuje `/api` i `/hubs`).
+
 ```bash
 cd frontend
-npx serve .
+npm install      # samo prvi put — instalira Vite i ovisnosti
+npm run dev      # dev server na http://localhost:3000
 ```
-
-Frontend je dostupan na `http://localhost:3000`.
 
 Otvori `http://localhost:3000/login.html` i prijavi se s defaultnim korisnikom.
 
-> **Napomena:** Prije prvog fetchanja otvori `https://localhost:7146` u browseru i prihvati self-signed certifikat klikom na "Advanced → Proceed anyway". U suprotnom browser ce blokirati HTTPS zahtjeve prema API-ju.
+Dev proxy preusmjerava `/api` i `/hubs` na `https://localhost:7146`, pa u developmentu **nema CORS-a ni prihvaćanja self-signed certifikata**.
+
+### Produkcijski build
+
+```bash
+npm run build    # generira dist/ (statički bundle)
+npm run preview  # lokalna provjera produkcijskog builda
+```
 
 ---
 
@@ -133,8 +141,12 @@ InsurancePartners/
 │   ├── Partners.Dal/          # Repozitoriji (Dapper), EF Core (Identity)
 │   └── SqlScripts/            # SQL skripta za kreiranje baze
 ├── frontend/
+│   ├── package.json           # Vite + npm skripte (dev/build/preview)
+│   ├── vite.config.js         # Vite config (dev proxy, build ulazi)
 │   ├── css/                   # Stilovi
-│   ├── js/                    # JavaScript (auth, api, SignalR, app logika)
+│   ├── js/                    # ES moduli (config, services, errors, helpers, partner, policy)
+│   │   ├── main.js            # ulaz za index.html
+│   │   └── login.js           # ulaz za login.html
 │   ├── partials/              # HTML parcijali (forme, modali, liste)
 │   ├── login.html             # Stranica za prijavu
 │   └── index.html             # Glavna stranica (lista partnera)
