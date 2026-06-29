@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Partners.Api.Caching;
 using Partners.Api.ErrorHandling;
 using Partners.Api.Notifications;
 using Partners.Core.Contracts;
@@ -122,6 +123,14 @@ internal static class ServiceCollectionExtensions
 
         services.AddProblemDetails();
         services.AddExceptionHandler<ProblemExceptionHandler>();
+
+        // t4: in-memory output caching — ponovljeni GET-ovi se posluze iz kesa umjesto iz baze.
+        // Custom policy "PartnersList" kesira i autentificirane GET-ove (lista je ista za sve
+        // PolicyManagere → shared kes), s tagom za invalidaciju na write.
+        services.AddOutputCache(options =>
+        {
+            options.AddPolicy("PartnersList", new PartnersListCachePolicy());
+        });
 
         services.AddCors(options =>
         {

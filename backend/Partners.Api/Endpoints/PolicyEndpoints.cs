@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.OutputCaching;
 using Partners.Core.Contracts;
 using Partners.Core.DTOs.Requests;
 using Partners.Core.DTOs.Responses;
@@ -17,6 +18,7 @@ public static class PolicyEndpoints
             CreatePolicyRequest request,
             IPolicyService service,
             IPartnerNotifier notifier,
+            IOutputCacheStore outputCacheStore,
             ILoggerFactory loggerFactory,
             CancellationToken cancellationToken) =>
         {
@@ -26,6 +28,9 @@ public static class PolicyEndpoints
             {
                 return Results.BadRequest(new { errors = result.Errors });
             }
+
+            // Nova polica mijenja flag/summary partnera u listi — invalidiraj kesiranu listu.
+            await outputCacheStore.EvictByTagAsync("partners", cancellationToken);
 
             // Notifikacija je sporedni efekt — njen neuspjeh ne smije srušiti uspješno kreiranu policu.
             try

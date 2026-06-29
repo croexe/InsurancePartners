@@ -35,6 +35,9 @@ internal static class WebApplicationExtensions
         app.UseAuthentication();
         app.UseAuthorization();
 
+        // Poslije autorizacije — neautoriziran zahtjev dobije 401 prije nego dode do kesa.
+        app.UseOutputCache();
+
         app.MapAuthEndpoints();
         app.MapPartnerEndpoints();
         app.MapPolicyEndpoints();
