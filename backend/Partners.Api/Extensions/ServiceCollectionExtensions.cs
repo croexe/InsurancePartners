@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Timeouts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -45,6 +46,23 @@ internal static class ServiceCollectionExtensions
         services.ConfigureHttpJsonOptions(options =>
         {
             options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
+
+        // t2: ogranicenje velicine request body-ja (Kestrel) — zastita od velikih payloada.
+        var maxRequestBodyBytes = configuration.GetValue<long?>("RequestLimits:MaxBodyBytes") ?? 262144;
+        builder.WebHost.ConfigureKestrel(kestrel =>
+        {
+            kestrel.Limits.MaxRequestBodySize = maxRequestBodyBytes;
+        });
+
+        // t3: request timeout — spori zahtjevi ne drze resurse (npr. Slowloris).
+        var requestTimeoutSeconds = configuration.GetValue<int?>("RequestTimeout:Seconds") ?? 30;
+        services.AddRequestTimeouts(options =>
+        {
+            options.DefaultPolicy = new RequestTimeoutPolicy
+            {
+                Timeout = TimeSpan.FromSeconds(requestTimeoutSeconds)
+            };
         });
 
         services.AddSignalR();

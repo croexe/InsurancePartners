@@ -30,6 +30,8 @@ internal static class WebApplicationExtensions
 
         app.UseRateLimiter();
 
+        app.UseRequestTimeouts();
+
         app.UseAuthentication();
         app.UseAuthorization();
 
@@ -37,7 +39,8 @@ internal static class WebApplicationExtensions
         app.MapPartnerEndpoints();
         app.MapPolicyEndpoints();
 
-        app.MapHub<PartnerHub>("/hubs/partners");
+        // Hub je dugotrajna veza — iskljucujemo ga iz request timeouta da ne prekida SignalR.
+        app.MapHub<PartnerHub>("/hubs/partners").DisableRequestTimeout();
 
         return app;
     }
