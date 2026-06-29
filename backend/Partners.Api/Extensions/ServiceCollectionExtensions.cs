@@ -124,6 +124,23 @@ internal static class ServiceCollectionExtensions
         {
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
+            // Globalni limiter — vrijedi za SVE endpointe (zastita od opceg flooda / L7 zlouporabe).
+            // Particioniran po IP-u; config se cita lazy (kao i login policy) radi override-a u testovima.
+            options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+            {
+                var config = httpContext.RequestServices.GetRequiredService<IConfiguration>();
+                var permitLimit = config.GetValue<int?>("RateLimiting:Global:PermitLimit") ?? 100;
+                var windowSeconds = config.GetValue<int?>("RateLimiting:Global:WindowSeconds") ?? 60;
+
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = permitLimit,
+                        Window = TimeSpan.FromSeconds(windowSeconds)
+                    });
+            });
+
             options.AddPolicy("login", httpContext =>
             {
                 var config = httpContext.RequestServices.GetRequiredService<IConfiguration>();

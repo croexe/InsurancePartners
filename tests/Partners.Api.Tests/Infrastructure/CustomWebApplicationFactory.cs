@@ -15,9 +15,10 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     public Mock<IPolicyService> PolicyServiceMock { get; } = new();
     public Mock<IPartnerNotifier> PartnerNotifierMock { get; } = new();
 
-    // Visok limit u testovima da visestruki login pozivi ne udare u 429.
-    // Test za 429 nadjacava ovo svojstvo (jedini izvor vrijednosti — bez sukoba config izvora).
+    // Visok limit u testovima da visestruki pozivi ne udare u 429.
+    // Testovi za 429 nadjacavaju ova svojstva (jedini izvor vrijednosti — bez sukoba config izvora).
     protected virtual int LoginRateLimitPermits => 1000;
+    protected virtual int GlobalRateLimitPermits => 10000;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -30,7 +31,9 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 ["ConnectionStrings:InsurancePartnersDb"] =
                     "Server=(localdb)\\MSSQLLocalDB;Database=WienerPartnersTest;Trusted_Connection=True;TrustServerCertificate=True;",
                 ["RateLimiting:Login:PermitLimit"] = LoginRateLimitPermits.ToString(),
-                ["RateLimiting:Login:WindowSeconds"] = "60"
+                ["RateLimiting:Login:WindowSeconds"] = "60",
+                ["RateLimiting:Global:PermitLimit"] = GlobalRateLimitPermits.ToString(),
+                ["RateLimiting:Global:WindowSeconds"] = "60"
             });
         });
 

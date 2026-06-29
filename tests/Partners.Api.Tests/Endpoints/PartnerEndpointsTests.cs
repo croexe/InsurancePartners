@@ -99,4 +99,22 @@ public class PartnerEndpointsTests : IClassFixture<CustomWebApplicationFactory>
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
+
+    [Fact]
+    public async Task Request_ExceedsGlobalRateLimit_Returns429()
+    {
+        using var lowGlobalFactory = new LowGlobalLimitFactory();
+        var client = lowGlobalFactory.CreateClient();
+
+        await client.GetAsync("/api/partners");              // 1 — prolazi (401, ali trosi permit)
+        await client.GetAsync("/api/partners");              // 2 — prolazi (401)
+        var third = await client.GetAsync("/api/partners");  // 3 — odbijen globalnim limiterom
+
+        third.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
+    }
+
+    private sealed class LowGlobalLimitFactory : CustomWebApplicationFactory
+    {
+        protected override int GlobalRateLimitPermits => 2;
+    }
 }
