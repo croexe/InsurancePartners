@@ -1,4 +1,9 @@
-﻿function resetPartnerForm() {
+﻿import { clearAlert, showView, showAlert } from "../helpers/helpers.js"
+import { api } from "../../api.js";
+import { ApiError } from "../errors/apiError.js";
+import { loadPartners, highlightNewPartnerRow } from "../partner/partner-list.js"
+
+export function resetPartnerForm() {
     const form = document.getElementById("partnerForm");
     form.reset();
     form.classList.remove("was-validated");
@@ -29,7 +34,7 @@ function validateOptionalPartnerFields() {
     return allValid;
 }
 
-async function submitPartnerForm(e) {
+export async function submitPartnerForm(e) {
     e.preventDefault();
     const form = e.target;
 
@@ -55,12 +60,22 @@ async function submitPartnerForm(e) {
 
     clearAlert("formAlert");
 
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.textContent = "Spremanje...";
+
     try {
         const result = await api.createPartner(request);
         await loadPartners();
         showView("view-list");
         highlightNewPartnerRow(result.id);
-    } catch (err) {
-        showAlert("formAlert", (err.errors || ["Error fetching partner."]).join("<br>"));
+    } catch (error) {
+        if (error instanceof ApiError && error.status === 401) {
+            return;
+        }
+        showAlert("formAlert", error.errors || ["Greška pri spremanju partnera."]);
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Spremi partnera";
     }
 }

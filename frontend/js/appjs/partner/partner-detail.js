@@ -1,8 +1,20 @@
-﻿let currentModalPolicies = [];
-let currentPolicyPage = 1;
-const POLICY_PAGE_SIZE = 5;
+import { createPaginator } from "../helpers/pagination.js";
+import { escapeHtml,showAlert } from "../helpers/helpers.js";
+import { api } from "../../api.js";
+import { ApiError } from "../errors/apiError.js";
 
-async function openPartnerDetail(id) {
+let currentModalPolicies = [];
+
+const policyPaginator = createPaginator({
+    pageSize: 5,
+    infoElementId: "policyPaginationInfo",
+    controlsElementId: "policyPaginationControls",
+    itemNoun: "polica",
+    windowed: false,
+    onRender: renderPolicyRows
+});
+
+export async function openPartnerDetail(id) {
     try {
         const partner = await api.getPartnerById(id);
         document.getElementById("partnerDetailTitle").textContent = partner.fullName;
@@ -35,92 +47,28 @@ async function openPartnerDetail(id) {
             "</div>";
 
         currentModalPolicies = partner.policies;
-        currentPolicyPage = 1;
-        renderPolicyTable();
+        policyPaginator.setItems(currentModalPolicies);
 
         $("#partnerDetailModal").modal("show");
-    } catch (err) {
-        showAlert("listAlert", "Error fetching partner details.");
+    } catch (error) {
+        if (error instanceof ApiError && error.status === 401) {
+            return;
+        }
+        showAlert("listAlert", error.errors || ["Greška pri dohvaćanju detalja partnera."]);
     }
 }
 
-function getTotalPolicyPages() {
-    return Math.max(1, Math.ceil(currentModalPolicies.length / POLICY_PAGE_SIZE));
-}
-
-function goToPolicyPage(page) {
-    const totalPages = getTotalPolicyPages();
-    currentPolicyPage = Math.min(Math.max(1, page), totalPages);
-    renderPolicyTable();
-}
-
-function renderPolicyTable() {
+function renderPolicyRows(pagePolicies) {
     const tbody = document.getElementById("policyTableBody");
 
-    if (currentModalPolicies.length === 0) {
+    if (pagePolicies.length === 0) {
         tbody.innerHTML = '<tr><td colspan="2" class="text-muted">Nema unesenih polica.</td></tr>';
-        renderPolicyPaginationControls();
         return;
     }
-
-    const totalPages = getTotalPolicyPages();
-    if (currentPolicyPage > totalPages) {
-        currentPolicyPage = totalPages;
-    }
-
-    const startIndex = (currentPolicyPage - 1) * POLICY_PAGE_SIZE;
-    const pagePolicies = currentModalPolicies.slice(startIndex, startIndex + POLICY_PAGE_SIZE);
 
     tbody.innerHTML = pagePolicies
-        .map(function (pol) {
-            return "<tr><td>" + escapeHtml(pol.policyNumber) + "</td><td class=\"amount\">" + pol.amount.toFixed(2) + " kn</td></tr>";
+        .map(function (policy) {
+            return "<tr><td>" + escapeHtml(policy.policyNumber) + "</td><td class=\"amount\">" + policy.amount.toFixed(2) + " kn</td></tr>";
         })
         .join("");
-
-    renderPolicyPaginationControls();
-}
-
-function renderPolicyPaginationControls() {
-    const totalPages = getTotalPolicyPages();
-    const total = currentModalPolicies.length;
-
-    const infoEl = document.getElementById("policyPaginationInfo");
-    if (total === 0) {
-        infoEl.textContent = "";
-    } else {
-        const startIndex = (currentPolicyPage - 1) * POLICY_PAGE_SIZE + 1;
-        const endIndex = Math.min(currentPolicyPage * POLICY_PAGE_SIZE, total);
-        infoEl.textContent = startIndex + "–" + endIndex + " od " + total + " polica";
-    }
-
-    const controlsEl = document.getElementById("policyPaginationControls");
-
-    if (totalPages <= 1) {
-        controlsEl.innerHTML = "";
-        return;
-    }
-
-    const buttons = [];
-
-    buttons.push(
-        '<button type="button" class="page-btn" data-page="' + (currentPolicyPage - 1) + '"' +
-        (currentPolicyPage === 1 ? " disabled" : "") + '>&lsaquo;</button>'
-    );
-
-    for (let page = 1; page <= totalPages; page++) {
-        buttons.push(
-            '<button type="button" class="page-btn' + (page === currentPolicyPage ? " active" : "") + '" data-page="' + page + '">' + page + '</button>'
-        );
-    }
-
-    buttons.push(
-        '<button type="button" class="page-btn" data-page="' + (currentPolicyPage + 1) + '"' +
-        (currentPolicyPage === totalPages ? " disabled" : "") + '>&rsaquo;</button>'
-    );
-
-    controlsEl.innerHTML = buttons.join("");
-
-    controlsEl.querySelectorAll(".page-btn[data-page]").forEach((btn) => {
-        btn.addEventListener("click", () => goToPolicyPage(Number(btn.dataset.page)));
-    });
 }
