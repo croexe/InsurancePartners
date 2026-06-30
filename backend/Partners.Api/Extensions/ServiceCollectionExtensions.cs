@@ -1,6 +1,5 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http.Timeouts;
-using Microsoft.EntityFrameworkCore;
 using Partners.Api.Caching;
 using Partners.Api.ErrorHandling;
 using Partners.Api.Extensions.Configurations;
@@ -8,8 +7,6 @@ using Partners.Api.Notifications;
 using Partners.Core.Contracts;
 using Partners.Core.Services;
 using Partners.Core.Validators;
-using Partners.Dal.Database;
-using Partners.Dal.Repositories;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 using System.Text.Json.Serialization;
 
@@ -50,17 +47,10 @@ internal static class ServiceCollectionExtensions
 
         services.AddSignalR();
 
-        services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("InsurancePartnersDb")));
+        services.AddPersistence(configuration);
 
         services.AddJwtAuthentication(configuration);
 
-        services.AddSingleton<IDbConnectionFactory>(_ =>
-            new SqlConnectionFactory(
-                configuration.GetConnectionString("InsurancePartnersDb")!));
-
-        services.AddScoped<IPartnerRepository, PartnerRepository>();
-        services.AddScoped<IPolicyRepository, PolicyRepository>();
         services.AddScoped<IPartnerService, PartnerService>();
         services.AddScoped<IPolicyService, PolicyService>();
         services.AddScoped<IPartnerNotifier, SignalRPartnerNotifier>();
