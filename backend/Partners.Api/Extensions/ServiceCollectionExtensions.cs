@@ -1,6 +1,4 @@
 using FluentValidation;
-using Microsoft.AspNetCore.Http.Timeouts;
-using Partners.Api.Caching;
 using Partners.Api.ErrorHandling;
 using Partners.Api.Extensions.Configurations;
 using Partners.Api.Notifications;
@@ -28,22 +26,7 @@ internal static class ServiceCollectionExtensions
             options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
         });
 
-        // t2: ogranicenje velicine request body-ja (Kestrel) — zastita od velikih payloada.
-        var maxRequestBodyBytes = configuration.GetValue<long?>("RequestLimits:MaxBodyBytes") ?? 262144;
-        builder.WebHost.ConfigureKestrel(kestrel =>
-        {
-            kestrel.Limits.MaxRequestBodySize = maxRequestBodyBytes;
-        });
-
-        // t3: request timeout — spori zahtjevi ne drze resurse (npr. Slowloris).
-        var requestTimeoutSeconds = configuration.GetValue<int?>("RequestTimeout:Seconds") ?? 30;
-        services.AddRequestTimeouts(options =>
-        {
-            options.DefaultPolicy = new RequestTimeoutPolicy
-            {
-                Timeout = TimeSpan.FromSeconds(requestTimeoutSeconds)
-            };
-        });
+        builder.AddRequestHardening();
 
         services.AddSignalR();
 
@@ -61,25 +44,9 @@ internal static class ServiceCollectionExtensions
         services.AddProblemDetails();
         services.AddExceptionHandler<ProblemExceptionHandler>();
 
-        // t4: in-memory output caching — ponovljeni GET-ovi se posluze iz kesa umjesto iz baze.
-        // Custom policy "PartnersList" kesira i autentificirane GET-ove (lista je ista za sve
-        // PolicyManagere → shared kes), s tagom za invalidaciju na write.
-        services.AddOutputCache(options =>
-        {
-            options.AddPolicy("PartnersList", new PartnersListCachePolicy());
-        });
+        services.AddOutputCachePolicies();
 
-        services.AddCors(options =>
-        {
-            options.AddPolicy("AllowFrontend", policy =>
-            {
-                policy
-                    .WithOrigins(builder.Configuration["Cors:AllowedOrigin"]!)
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
-            });
-        });
+        services.AddCorsPolicy(configuration);
 
         services.AddRateLimitingPolicies();
 
