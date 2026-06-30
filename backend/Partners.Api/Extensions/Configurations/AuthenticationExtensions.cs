@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using Partners.Api.Authentication;
 using Partners.Dal.Database;
@@ -59,6 +60,7 @@ internal static class AuthenticationExtensions
 
         services.AddAuthorization();
 
+        services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 
         return services;

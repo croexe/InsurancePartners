@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
@@ -10,10 +10,12 @@ namespace Partners.Api.Authentication;
 public sealed class JwtTokenGenerator : IJwtTokenGenerator
 {
     private readonly JwtOptions _options;
+    private readonly TimeProvider _timeProvider;
 
-    public JwtTokenGenerator(IOptions<JwtOptions> options)
+    public JwtTokenGenerator(IOptions<JwtOptions> options, TimeProvider timeProvider)
     {
         _options = options.Value;
+        _timeProvider = timeProvider;
     }
 
     public string GenerateToken(IdentityUser user, IEnumerable<string> roles)
@@ -27,13 +29,19 @@ public sealed class JwtTokenGenerator : IJwtTokenGenerator
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Secret));
-        var token = new JwtSecurityToken(
-            issuer: _options.Issuer,
-            audience: _options.Audience,
-            claims: claims,
-            expires: DateTime.UtcNow.AddHours(_options.ExpiryHours),
-            signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256));
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Issuer = _options.Issuer,
+            Audience = _options.Audience,
+            Subject = new ClaimsIdentity(claims),
+            IssuedAt = now,
+            NotBefore = now,
+            Expires = now.AddHours(_options.ExpiryHours),
+            SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
+        };
+
+        return new JsonWebTokenHandler().CreateToken(tokenDescriptor);
     }
 }
