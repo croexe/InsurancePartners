@@ -7,13 +7,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Partners.Api.Caching;
 using Partners.Api.ErrorHandling;
+using Partners.Api.Extensions.Configurations;
 using Partners.Api.Notifications;
 using Partners.Core.Contracts;
 using Partners.Core.Services;
 using Partners.Core.Validators;
 using Partners.Dal.Database;
 using Partners.Dal.Repositories;
-using Serilog;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -25,19 +25,7 @@ internal static class ServiceCollectionExtensions
 {
     public static WebApplicationBuilder ApplyWienConfiguration(this WebApplicationBuilder builder)
     {
-        builder.Host.UseSerilog((ctx, config) =>
-        {
-            var logPath = ctx.Configuration["Serilog:LogPath"]!;
-
-            config
-                .ReadFrom.Configuration(ctx.Configuration)
-                .WriteTo.Console()
-                .WriteTo.Async(a => a.File(
-                    logPath,
-                    rollingInterval: RollingInterval.Day,
-                    retainedFileCountLimit: 30,
-                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"));
-        });
+        builder.AddSerilogLogging();
 
         var services = builder.Services;
         var configuration = builder.Configuration;
