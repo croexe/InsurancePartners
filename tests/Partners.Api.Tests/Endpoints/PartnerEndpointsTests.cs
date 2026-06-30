@@ -113,8 +113,94 @@ public class PartnerEndpointsTests : IClassFixture<CustomWebApplicationFactory>
         third.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
     }
 
+    [Fact]
+    public async Task GetAll_CachedAcrossRequests_CallsServiceOnce()
+    {
+        using var factory = new CustomWebApplicationFactory();
+        factory.PartnerServiceMock
+            .Setup(s => s.GetAllPartnersAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Enumerable.Empty<PartnerListItemResponse>());
+
+        var token = await factory.GetValidTokenAsync();
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        await client.GetAsync("/api/partners");   // miss → servis pozvan, kesirano
+        await client.GetAsync("/api/partners");   // hit → posluzeno iz kesa
+
+        factory.PartnerServiceMock.Verify(
+            s => s.GetAllPartnersAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreatePartner_InvalidatesCache_NextGetCallsServiceAgain()
+    {
+        using var factory = new CustomWebApplicationFactory();
+        factory.PartnerServiceMock
+            .Setup(s => s.GetAllPartnersAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Enumerable.Empty<PartnerListItemResponse>());
+        factory.PartnerServiceMock
+            .Setup(s => s.CreatePartnerAsync(It.IsAny<CreatePartnerRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(PartnerServiceResult.Ok(1));
+
+        var token = await factory.GetValidTokenAsync();
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var request = new CreatePartnerRequest
+        {
+            FirstName = "Ivan",
+            LastName = "Horvat",
+            PartnerNumber = "12345678901234567890",
+            PartnerTypeId = PartnerType.Personal,
+            CreateByUser = "user@wiener.hr",
+            IsForeign = false,
+            Gender = Gender.M
+        };
+
+        await client.GetAsync("/api/partners");                 // 1 — servis pozvan, kesirano
+        await client.PostAsJsonAsync("/api/partners", request); // invalidira tag "partners"
+        await client.GetAsync("/api/partners");                 // 2 — kes prazan → servis opet pozvan
+
+        factory.PartnerServiceMock.Verify(
+            s => s.GetAllPartnersAsync(It.IsAny<CancellationToken>()), Times.Exactly(2));
+    }
+
+    [Fact]
+    public async Task ConcurrentRequests_ExceedConcurrencyLimit_Returns429()
+    {
+        using var factory = new LowConcurrencyFactory();
+        var gate = new TaskCompletionSource();
+        factory.PartnerServiceMock
+            .Setup(s => s.GetAllPartnersAsync(It.IsAny<CancellationToken>()))
+            .Returns(async () =>
+            {
+                await gate.Task;
+                return Enumerable.Empty<PartnerListItemResponse>();
+            });
+
+        var token = await factory.GetValidTokenAsync();
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var first = client.GetAsync("/api/partners");         // uzme jedinu dozvolu, blokira na gate
+        await Task.Delay(300);                                // osiguraj da je prvi u obradi
+        var second = await client.GetAsync("/api/partners");  // nema dozvole, red=0 → 429
+
+        second.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
+
+        gate.SetResult();
+        await first;
+    }
+
     private sealed class LowGlobalLimitFactory : CustomWebApplicationFactory
     {
         protected override int GlobalRateLimitPermits => 2;
+    }
+
+    private sealed class LowConcurrencyFactory : CustomWebApplicationFactory
+    {
+        protected override int ConcurrencyPermitLimit => 1;
+        protected override int ConcurrencyQueueLimit => 0;
     }
 }

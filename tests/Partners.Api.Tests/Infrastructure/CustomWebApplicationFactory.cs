@@ -19,6 +19,8 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     // Testovi za 429 nadjacavaju ova svojstva (jedini izvor vrijednosti — bez sukoba config izvora).
     protected virtual int LoginRateLimitPermits => 1000;
     protected virtual int GlobalRateLimitPermits => 10000;
+    protected virtual int ConcurrencyPermitLimit => 10000;
+    protected virtual int ConcurrencyQueueLimit => 100;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -33,7 +35,9 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 ["RateLimiting:Login:PermitLimit"] = LoginRateLimitPermits.ToString(),
                 ["RateLimiting:Login:WindowSeconds"] = "60",
                 ["RateLimiting:Global:PermitLimit"] = GlobalRateLimitPermits.ToString(),
-                ["RateLimiting:Global:WindowSeconds"] = "60"
+                ["RateLimiting:Global:WindowSeconds"] = "60",
+                ["RateLimiting:Concurrency:PermitLimit"] = ConcurrencyPermitLimit.ToString(),
+                ["RateLimiting:Concurrency:QueueLimit"] = ConcurrencyQueueLimit.ToString()
             });
         });
 
