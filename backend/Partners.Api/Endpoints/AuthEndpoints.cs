@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
+using Partners.Api.Authentication;
 using Partners.Core.DTOs.Requests;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
 namespace Partners.Api.Endpoints;
 
@@ -15,7 +12,7 @@ public static class AuthEndpoints
             LoginRequest request,
             UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
-            IConfiguration config) =>
+            IJwtTokenGenerator tokenGenerator) =>
         {
             if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
                 return Results.Unauthorized();
@@ -34,23 +31,9 @@ public static class AuthEndpoints
             }
 
             var roles = await userManager.GetRolesAsync(user);
-            var claims = new List<Claim>
-            {
-                new(JwtRegisteredClaimNames.Sub, user.Id),
-                new(JwtRegisteredClaimNames.Email, user.Email!),
-                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
-            claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
+            var token = tokenGenerator.GenerateToken(user, roles);
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Secret"]!));
-            var token = new JwtSecurityToken(
-                issuer: config["Jwt:Issuer"],
-                audience: config["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(8),
-                signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256));
-
-            return Results.Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
+            return Results.Ok(new { token });
         })
         .AllowAnonymous()
         .RequireRateLimiting("login")
