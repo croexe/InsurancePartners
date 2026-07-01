@@ -18,18 +18,21 @@ public class PartnerRepository : IPartnerRepository
         _dbConnectionFactory = dbConnectionFactory;
     }
 
-    public async Task<IEnumerable<PartnerWithSummary>> FetchAllPartnersAsync(CancellationToken cancellationToken = default)
+    public async Task<(IEnumerable<PartnerWithSummary> Items, int TotalCount)> FetchPartnersPageAsync(int offset, int pageSize, CancellationToken cancellationToken = default)
     {
         await using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
 
         var command = new CommandDefinition(
             "dbo.GetAllPartnersWithPolicySummeriesFirstServe",
+            new { Offset = offset, PageSize = pageSize },
             commandType: CommandType.StoredProcedure,
             cancellationToken: cancellationToken);
 
-        var rows = await connection.QueryAsync<PartnerRow>(command);
+        using var multi = await connection.QueryMultipleAsync(command);
+        var rows = await multi.ReadAsync<PartnerRow>();
+        var totalCount = await multi.ReadSingleAsync<int>();
 
-        return rows.Select(row => row.ToPartnerWithSummary());
+        return (rows.Select(row => row.ToPartnerWithSummary()), totalCount);
     }
 
     public async Task<Partner?> FetchPartnerByIdAsync(int id, CancellationToken cancellationToken = default)

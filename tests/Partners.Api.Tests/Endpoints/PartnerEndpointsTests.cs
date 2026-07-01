@@ -34,8 +34,8 @@ public class PartnerEndpointsTests : IClassFixture<CustomWebApplicationFactory>
     {
         var token = await _factory.GetValidTokenAsync();
         _factory.PartnerServiceMock
-            .Setup(s => s.GetAllPartnersAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync([]);
+            .Setup(s => s.GetPartnersPageAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResponse<PartnerListItemResponse>());
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         var response = await _client.GetAsync("/api/partners");
@@ -118,8 +118,8 @@ public class PartnerEndpointsTests : IClassFixture<CustomWebApplicationFactory>
     {
         using var factory = new CustomWebApplicationFactory();
         factory.PartnerServiceMock
-            .Setup(s => s.GetAllPartnersAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Enumerable.Empty<PartnerListItemResponse>());
+            .Setup(s => s.GetPartnersPageAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResponse<PartnerListItemResponse>());
 
         var token = await factory.GetValidTokenAsync();
         var client = factory.CreateClient();
@@ -129,7 +129,7 @@ public class PartnerEndpointsTests : IClassFixture<CustomWebApplicationFactory>
         await client.GetAsync("/api/partners");   // hit → posluzeno iz kesa
 
         factory.PartnerServiceMock.Verify(
-            s => s.GetAllPartnersAsync(It.IsAny<CancellationToken>()), Times.Once);
+            s => s.GetPartnersPageAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -137,8 +137,8 @@ public class PartnerEndpointsTests : IClassFixture<CustomWebApplicationFactory>
     {
         using var factory = new CustomWebApplicationFactory();
         factory.PartnerServiceMock
-            .Setup(s => s.GetAllPartnersAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Enumerable.Empty<PartnerListItemResponse>());
+            .Setup(s => s.GetPartnersPageAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResponse<PartnerListItemResponse>());
         factory.PartnerServiceMock
             .Setup(s => s.CreatePartnerAsync(It.IsAny<CreatePartnerRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<int>.Ok(1));
@@ -163,7 +163,7 @@ public class PartnerEndpointsTests : IClassFixture<CustomWebApplicationFactory>
         await client.GetAsync("/api/partners");                 // 2 — kes prazan → servis opet pozvan
 
         factory.PartnerServiceMock.Verify(
-            s => s.GetAllPartnersAsync(It.IsAny<CancellationToken>()), Times.Exactly(2));
+            s => s.GetPartnersPageAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 
     [Fact]
@@ -172,11 +172,11 @@ public class PartnerEndpointsTests : IClassFixture<CustomWebApplicationFactory>
         using var factory = new LowConcurrencyFactory();
         var gate = new TaskCompletionSource();
         factory.PartnerServiceMock
-            .Setup(s => s.GetAllPartnersAsync(It.IsAny<CancellationToken>()))
+            .Setup(s => s.GetPartnersPageAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .Returns(async () =>
             {
                 await gate.Task;
-                return Enumerable.Empty<PartnerListItemResponse>();
+                return new PagedResponse<PartnerListItemResponse>();
             });
 
         var token = await factory.GetValidTokenAsync();
@@ -191,6 +191,24 @@ public class PartnerEndpointsTests : IClassFixture<CustomWebApplicationFactory>
 
         gate.SetResult();
         await first;
+    }
+
+    [Fact]
+    public async Task GetAll_PageSizeAboveMax_ClampedTo100()
+    {
+        using var factory = new CustomWebApplicationFactory();
+        factory.PartnerServiceMock
+            .Setup(s => s.GetPartnersPageAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResponse<PartnerListItemResponse>());
+
+        var token = await factory.GetValidTokenAsync();
+        var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        await client.GetAsync("/api/partners?pageSize=500");
+
+        factory.PartnerServiceMock.Verify(
+            s => s.GetPartnersPageAsync(1, 100, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     private sealed class LowGlobalLimitFactory : CustomWebApplicationFactory

@@ -17,13 +17,15 @@ public static class PartnerEndpoints
             .AddFluentValidationAutoValidation()
             .RequireAuthorization(policy => policy.RequireRole(Roles.PolicyManager));
 
-        group.MapGet("/", async (IPartnerService service, CancellationToken cancellationToken) =>
+        group.MapGet("/", async (int? page, int? pageSize, IPartnerService service, CancellationToken cancellationToken) =>
         {
-            var partners = await service.GetAllPartnersAsync(cancellationToken);
+            var currentPage = Math.Max(page ?? 1, 1);
+            var size = Math.Clamp(pageSize ?? 10, 1, 100);
+            var partners = await service.GetPartnersPageAsync(currentPage, size, cancellationToken);
             return Results.Ok(partners);
         })
         .CacheOutput(CacheConstants.PartnersListPolicy)
-        .Produces<IEnumerable<PartnerListItemResponse>>();
+        .Produces<PagedResponse<PartnerListItemResponse>>();
 
         group.MapGet("/{id:int}", async (int id, IPartnerService service, CancellationToken cancellationToken) =>
         {

@@ -91,6 +91,8 @@ GO
 -- =========================================================
 
 CREATE OR ALTER PROCEDURE dbo.GetAllPartnersWithPolicySummeriesFirstServe
+    @Offset   INT,
+    @PageSize INT
 AS
 BEGIN
     SELECT
@@ -104,7 +106,10 @@ BEGIN
         FROM dbo.Policy
         GROUP BY PartnerId
     ) ps ON ps.PartnerId = p.Id
-    ORDER BY p.CreatedAtUtc DESC;
+    ORDER BY p.CreatedAtUtc DESC
+    OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;
+
+    SELECT COUNT(*) FROM dbo.Partner;
 END
 GO
 

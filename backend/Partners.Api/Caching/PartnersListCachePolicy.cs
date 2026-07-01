@@ -17,6 +17,7 @@ public sealed class PartnersListCachePolicy : IOutputCachePolicy
         context.AllowCacheLookup = isGet;
         context.AllowCacheStorage = isGet;
         context.AllowLocking = true;
+        context.CacheVaryByRules.QueryKeys = "*";
         context.ResponseExpirationTimeSpan = Duration;
         context.Tags.Add(CacheConstants.PartnersTag);
 

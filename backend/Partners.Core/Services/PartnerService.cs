@@ -18,11 +18,18 @@ public class PartnerService : IPartnerService
         _policyRepository = policyRepository;
     }
 
-    public async Task<IEnumerable<PartnerListItemResponse>> GetAllPartnersAsync(CancellationToken cancellationToken = default)
+    public async Task<PagedResponse<PartnerListItemResponse>> GetPartnersPageAsync(int page, int pageSize, CancellationToken cancellationToken = default)
     {
-        var partners = await _partnerRepository.FetchAllPartnersAsync(cancellationToken);
+        var offset = (page - 1) * pageSize;
+        var (items, totalCount) = await _partnerRepository.FetchPartnersPageAsync(offset, pageSize, cancellationToken);
 
-        return partners.Select(item => item.ToListItemResponse());
+        return new PagedResponse<PartnerListItemResponse>
+        {
+            Items = items.Select(item => item.ToListItemResponse()).ToList(),
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount
+        };
     }
 
     public async Task<PartnerDetailResponse?> GetPartnerDetailsByIdAsync(int id, CancellationToken cancellationToken = default)
