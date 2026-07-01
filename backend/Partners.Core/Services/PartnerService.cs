@@ -2,8 +2,8 @@ using Partners.Core.Contracts;
 using Partners.Core.DTOs.Requests;
 using Partners.Core.DTOs.Responses;
 using Partners.Core.Models;
-using Partners.Core.Models.Enums;
 using Partners.Core.Models.Rules.Partner;
+using Partners.Core.Presentation;
 using Partners.Core.Results;
 
 namespace Partners.Core.Services;
@@ -29,7 +29,7 @@ public class PartnerService : IPartnerService
             FullName = $"{item.Partner.FirstName} {item.Partner.LastName}",
             PartnerNumber = item.Partner.PartnerNumber,
             CroatianPIN = item.Partner.CroatianPIN,
-            PartnerTypeName = SetPartnerType(item.Partner.PartnerTypeId),
+            PartnerTypeName = item.Partner.PartnerTypeId.ToDisplayName(),
             CreatedAtUtc = item.Partner.CreatedAtUtc,
             IsForeign = item.Partner.IsForeign,
             Gender = item.Partner.Gender.ToString(),
@@ -66,7 +66,7 @@ public class PartnerService : IPartnerService
             Address = partner.Address,
             PartnerNumber = partner.PartnerNumber,
             CroatianPIN = partner.CroatianPIN,
-            PartnerTypeName = SetPartnerType(partner.PartnerTypeId),
+            PartnerTypeName = partner.PartnerTypeId.ToDisplayName(),
             CreatedAtUtc = partner.CreatedAtUtc,
             CreateByUser = partner.CreateByUser,
             IsForeign = partner.IsForeign,
@@ -109,7 +109,4 @@ public class PartnerService : IPartnerService
 
     private static bool IsFlagged(int policyCount, decimal totalAmount) =>
         PartnerFlagRules.IsFlagged(policyCount, totalAmount);
-
-    private static string SetPartnerType(PartnerType partnerType) =>
-        partnerType == PartnerType.Personal ? "Privatna osoba" : "Pravna osoba";
 }
