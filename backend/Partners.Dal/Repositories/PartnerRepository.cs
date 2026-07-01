@@ -18,7 +18,7 @@ public class PartnerRepository : IPartnerRepository
 
     public async Task<IEnumerable<PartnerWithSummary>> FetchAllPartnersAsync(CancellationToken cancellationToken = default)
     {
-        using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
+        await using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
 
         var command = new CommandDefinition(
             "dbo.GetAllPartnersWithPolicySummeriesFirstServe",
@@ -32,7 +32,7 @@ public class PartnerRepository : IPartnerRepository
 
     public async Task<Partner?> FetchPartnerByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
+        await using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
 
         var command = new CommandDefinition(
             "dbo.GetPartnerById",
@@ -47,7 +47,7 @@ public class PartnerRepository : IPartnerRepository
 
     public async Task<int> InsertPartnerAsync(Partner partner, CancellationToken cancellationToken = default)
     {
-        using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
+        await using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
 
         var parameters = new
         {
@@ -74,7 +74,7 @@ public class PartnerRepository : IPartnerRepository
 
     public async Task<bool> ExternalCodeExistsAsync(string externalCode, CancellationToken cancellationToken = default)
     {
-        using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
+        await using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
 
         var command = new CommandDefinition(
             "dbo.ExternalCodeExists",

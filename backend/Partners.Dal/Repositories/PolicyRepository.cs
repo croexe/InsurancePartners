@@ -17,7 +17,7 @@ public class PolicyRepository : IPolicyRepository
 
     public async Task<IEnumerable<Policy>> FetchAllPoliciesByPartnerIdAsync(int partnerId, CancellationToken cancellationToken = default)
     {
-        using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
+        await using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
 
         var command = new CommandDefinition(
             "dbo.GetPoliciesByPartnerId",
@@ -30,7 +30,7 @@ public class PolicyRepository : IPolicyRepository
 
     public async Task<int> InsertPolicyAsync(Policy policy, CancellationToken cancellationToken = default)
     {
-        using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
+        await using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
 
         var parameters = new
         {
@@ -50,7 +50,7 @@ public class PolicyRepository : IPolicyRepository
 
     public async Task<PolicySummary> FetchPolicySummaryByPartnerIdAsync(int partnerId, CancellationToken cancellationToken = default)
     {
-        using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
+        await using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
 
         var command = new CommandDefinition(
             "dbo.GetPolicySummaryByPartnerId",

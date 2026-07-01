@@ -1,4 +1,4 @@
-using System.Data;
+using System.Data.Common;
 using Microsoft.Data.SqlClient;
 
 namespace Partners.Dal.Database;
@@ -12,7 +12,7 @@ public class SqlConnectionFactory : IDbConnectionFactory
         _connectionString = connectionString;
     }
 
-    public async Task<IDbConnection> CreateConnectionAsync(CancellationToken cancellationToken = default)
+    public async Task<DbConnection> CreateConnectionAsync(CancellationToken cancellationToken = default)
     {
         var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync(cancellationToken);
