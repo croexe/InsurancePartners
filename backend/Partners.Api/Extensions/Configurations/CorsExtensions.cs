@@ -1,3 +1,5 @@
+using Partners.Api.Constants;
+
 namespace Partners.Api.Extensions.Configurations;
 
 internal static class CorsExtensions
@@ -7,7 +9,7 @@ internal static class CorsExtensions
     {
         services.AddCors(options =>
         {
-            options.AddPolicy("AllowFrontend", policy =>
+            options.AddPolicy(PolicyNames.Cors, policy =>
             {
                 policy
                     .WithOrigins(configuration["Cors:AllowedOrigin"]!)

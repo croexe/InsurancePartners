@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.OutputCaching;
+using Partners.Api.Constants;
+using Partners.Core.Constants;
 using Partners.Core.Contracts;
 using Partners.Core.DTOs.Requests;
 using Partners.Core.DTOs.Responses;
@@ -12,14 +14,14 @@ public static class PartnerEndpoints
     {
         var group = app.MapGroup("api/partners")
             .AddFluentValidationAutoValidation()
-            .RequireAuthorization(policy => policy.RequireRole("PolicyManager"));
+            .RequireAuthorization(policy => policy.RequireRole(Roles.PolicyManager));
 
         group.MapGet("/", async (IPartnerService service, CancellationToken cancellationToken) =>
         {
             var partners = await service.GetAllPartnersAsync(cancellationToken);
             return Results.Ok(partners);
         })
-        .CacheOutput("PartnersList")
+        .CacheOutput(CacheConstants.PartnersListPolicy)
         .Produces<IEnumerable<PartnerListItemResponse>>();
 
         group.MapGet("/{id:int}", async (int id, IPartnerService service, CancellationToken cancellationToken) =>
@@ -45,7 +47,7 @@ public static class PartnerEndpoints
                 return Results.BadRequest(new { errors = result.Errors });
             }
 
-            await outputCacheStore.EvictByTagAsync("partners", cancellationToken);
+            await outputCacheStore.EvictByTagAsync(CacheConstants.PartnersTag, cancellationToken);
 
             return Results.Created($"/api/partners/{result.PartnerId}", new { id = result.PartnerId });
         })

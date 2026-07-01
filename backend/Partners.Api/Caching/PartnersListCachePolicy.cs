@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.OutputCaching;
+using Partners.Api.Constants;
 
 namespace Partners.Api.Caching;
 
@@ -17,7 +18,7 @@ public sealed class PartnersListCachePolicy : IOutputCachePolicy
         context.AllowCacheStorage = isGet;
         context.AllowLocking = true;
         context.ResponseExpirationTimeSpan = Duration;
-        context.Tags.Add("partners");
+        context.Tags.Add(CacheConstants.PartnersTag);
 
         return ValueTask.CompletedTask;
     }

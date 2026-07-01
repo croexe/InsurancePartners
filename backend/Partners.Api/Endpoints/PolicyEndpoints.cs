@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.OutputCaching;
+using Partners.Api.Constants;
+using Partners.Core.Constants;
 using Partners.Core.Contracts;
 using Partners.Core.DTOs.Requests;
 using Partners.Core.DTOs.Responses;
@@ -12,7 +14,7 @@ public static class PolicyEndpoints
     {
         var group = app.MapGroup("api/policies")
             .AddFluentValidationAutoValidation()
-            .RequireAuthorization(policy => policy.RequireRole("PolicyManager"));
+            .RequireAuthorization(policy => policy.RequireRole(Roles.PolicyManager));
 
         group.MapPost("/", async (
             CreatePolicyRequest request,
@@ -30,7 +32,7 @@ public static class PolicyEndpoints
             }
 
             // Nova polica mijenja flag/summary partnera u listi — invalidiraj kesiranu listu.
-            await outputCacheStore.EvictByTagAsync("partners", cancellationToken);
+            await outputCacheStore.EvictByTagAsync(CacheConstants.PartnersTag, cancellationToken);
 
             // Notifikacija je sporedni efekt — njen neuspjeh ne smije srušiti uspješno kreiranu policu.
             try

@@ -1,4 +1,5 @@
 using Partners.Api.Caching;
+using Partners.Api.Constants;
 
 namespace Partners.Api.Extensions.Configurations;
 
@@ -11,7 +12,7 @@ internal static class OutputCacheExtensions
     {
         services.AddOutputCache(options =>
         {
-            options.AddPolicy("PartnersList", new PartnersListCachePolicy());
+            options.AddPolicy(CacheConstants.PartnersListPolicy, new PartnersListCachePolicy());
         });
 
         return services;

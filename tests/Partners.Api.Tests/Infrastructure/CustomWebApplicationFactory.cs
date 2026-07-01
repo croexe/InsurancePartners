@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Partners.Core.Constants;
 using Partners.Core.Contracts;
 using System.Net.Http.Json;
 
@@ -65,15 +66,15 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-        if (!await roleManager.RoleExistsAsync("PolicyManager"))
-            await roleManager.CreateAsync(new IdentityRole("PolicyManager"));
+        if (!await roleManager.RoleExistsAsync(Roles.PolicyManager))
+            await roleManager.CreateAsync(new IdentityRole(Roles.PolicyManager));
 
         var existing = await userManager.FindByEmailAsync("test@wiener.hr");
         if (existing is null)
         {
             var user = new IdentityUser { UserName = "test@wiener.hr", Email = "test@wiener.hr", EmailConfirmed = true };
             await userManager.CreateAsync(user, "Test123!");
-            await userManager.AddToRoleAsync(user, "PolicyManager");
+            await userManager.AddToRoleAsync(user, Roles.PolicyManager);
         }
 
         var client = CreateClient();

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Partners.Api.Constants;
 using Partners.Api.Endpoints;
 using Partners.Api.Hubs;
 using Partners.Dal.Database;
@@ -26,7 +27,7 @@ internal static class WebApplicationExtensions
         // (RequireRateLimiting) vidi endpoint metadata.
         app.UseRouting();
 
-        app.UseCors("AllowFrontend");
+        app.UseCors(PolicyNames.Cors);
 
         app.UseRateLimiter();
 

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Partners.Api.Authentication;
+using Partners.Api.Constants;
 using Partners.Core.DTOs.Requests;
 
 namespace Partners.Api.Endpoints;
@@ -36,7 +37,7 @@ public static class AuthEndpoints
             return Results.Ok(new { token });
         })
         .AllowAnonymous()
-        .RequireRateLimiting("login")
+        .RequireRateLimiting(PolicyNames.LoginRateLimit)
         .Produces<object>()
         .ProducesProblem(StatusCodes.Status401Unauthorized);
 

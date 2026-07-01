@@ -1,16 +1,15 @@
 using Microsoft.AspNetCore.Identity;
+using Partners.Core.Constants;
 
 namespace Partners.Dal.Database;
 
 public static class IdentitySeeder
 {
-    public const string PolicyManagerRole = "PolicyManager";
-
     public static async Task SeedAsync(RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager, string defaultUserEmail, string defaultUserPassword)
     {
-        if (!await roleManager.RoleExistsAsync(PolicyManagerRole))
+        if (!await roleManager.RoleExistsAsync(Roles.PolicyManager))
         {
-            await roleManager.CreateAsync(new IdentityRole(PolicyManagerRole));
+            await roleManager.CreateAsync(new IdentityRole(Roles.PolicyManager));
         }
 
         var existing = await userManager.FindByEmailAsync(defaultUserEmail);
@@ -24,7 +23,7 @@ public static class IdentitySeeder
             };
 
             await userManager.CreateAsync(user, defaultUserPassword);
-            await userManager.AddToRoleAsync(user, PolicyManagerRole);
+            await userManager.AddToRoleAsync(user, Roles.PolicyManager);
         }
     }
 }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.RateLimiting;
+using Partners.Api.Constants;
 using System.Threading.RateLimiting;
 
 namespace Partners.Api.Extensions.Configurations;
@@ -49,7 +50,7 @@ internal static class RateLimitingExtensions
                         });
                 }));
 
-            options.AddPolicy("login", httpContext =>
+            options.AddPolicy(PolicyNames.LoginRateLimit, httpContext =>
             {
                 var config = httpContext.RequestServices.GetRequiredService<IConfiguration>();
                 var permitLimit = config.GetValue<int?>("RateLimiting:Login:PermitLimit") ?? 10;
