@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.OutputCaching;
 using Partners.Api.Constants;
+using Partners.Api.Endpoints.Extensions;
 using Partners.Core.Constants;
 using Partners.Core.Contracts;
 using Partners.Core.DTOs.Requests;
@@ -28,7 +29,7 @@ public static class PolicyEndpoints
 
             if (!result.Success)
             {
-                return Results.BadRequest(new { errors = result.Errors });
+                return result.ToBadRequest();
             }
 
             // Nova polica mijenja flag/summary partnera u listi — invalidiraj kesiranu listu.

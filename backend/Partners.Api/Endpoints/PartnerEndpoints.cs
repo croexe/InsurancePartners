@@ -44,7 +44,7 @@ public static class PartnerEndpoints
 
             if (!result.Success)
             {
-                return Results.BadRequest(new { errors = result.Errors });
+                return result.ToBadRequest();
             }
 
             await outputCacheStore.EvictByTagAsync(CacheConstants.PartnersTag, cancellationToken);
