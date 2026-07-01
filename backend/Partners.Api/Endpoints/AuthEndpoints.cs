@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Identity;
 using Partners.Api.Authentication;
 using Partners.Api.Constants;
 using Partners.Core.DTOs.Requests;
@@ -9,32 +8,13 @@ public static class AuthEndpoints
 {
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/auth/login", async (
-            LoginRequest request,
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
-            IJwtTokenGenerator tokenGenerator) =>
+        app.MapPost("/api/auth/login", async (LoginRequest request, IAuthService authService) =>
         {
-            if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
-                return Results.Unauthorized();
+            var result = await authService.AuthenticateAsync(request.Email, request.Password);
 
-            var user = await userManager.FindByEmailAsync(request.Email);
-            if (user is null)
-            {
-                return Results.Unauthorized();
-            }
-
-            // Broji neuspjele pokusaje i zakljucava racun (lockoutOnFailure: true).
-            var result = await signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
-            if (!result.Succeeded)
-            {
-                return Results.Unauthorized();
-            }
-
-            var roles = await userManager.GetRolesAsync(user);
-            var token = tokenGenerator.GenerateToken(user, roles);
-
-            return Results.Ok(new { token });
+            return result.Success
+                ? Results.Ok(new { token = result.Value })
+                : Results.Unauthorized();
         })
         .AllowAnonymous()
         .RequireRateLimiting(PolicyNames.LoginRateLimit)

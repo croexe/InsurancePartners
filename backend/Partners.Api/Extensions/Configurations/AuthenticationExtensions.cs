@@ -62,6 +62,7 @@ internal static class AuthenticationExtensions
 
         services.TryAddSingleton(TimeProvider.System);
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddScoped<IAuthService, AuthService>();
 
         return services;
     }
