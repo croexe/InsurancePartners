@@ -5,17 +5,19 @@ namespace Partners.Core.Validators;
 
 public class CreatePartnerRequestValidator : AbstractValidator<CreatePartnerRequest>
 {
+    private const string AlphanumericPattern = @"^[a-zA-Z0-9À-ſ ]+$";
+
     public CreatePartnerRequestValidator()
     {
         RuleFor(x => x.FirstName)
             .NotEmpty()
             .Length(2, 255)
-            .Matches(@"^[a-zA-Z0-9À-ſ ]+$").WithMessage("FirstName must be alphanumeric.");
+            .Matches(AlphanumericPattern).WithMessage("FirstName must be alphanumeric.");
 
         RuleFor(x => x.LastName)
             .NotEmpty()
             .Length(2, 255)
-            .Matches(@"^[a-zA-Z0-9À-ſ ]+$").WithMessage("LastName must be alphanumeric.");
+            .Matches(AlphanumericPattern).WithMessage("LastName must be alphanumeric.");
 
         RuleFor(x => x.Address)
             .Matches(@"^[a-zA-Z0-9À-ſ ,.\-]+$").WithMessage("Address must be alphanumeric.")
