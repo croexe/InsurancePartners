@@ -2,6 +2,7 @@ using FluentAssertions;
 using Moq;
 using Partners.Core.Contracts;
 using Partners.Core.DTOs.Requests;
+using Partners.Core.Exceptions;
 using Partners.Core.Models;
 using Partners.Core.Models.Enums;
 using Partners.Core.Services;
@@ -37,14 +38,13 @@ public class PartnerServiceTests
         request.ExternalCode = "EXT123456789";
 
         _partnerRepoMock
-            .Setup(r => r.ExternalCodeExistsAsync("EXT123456789", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
+            .Setup(r => r.InsertPartnerAsync(It.IsAny<Partner>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new DuplicateExternalCodeException("EXT123456789"));
 
         var result = await _service.CreatePartnerAsync(request);
 
         result.Success.Should().BeFalse();
         result.Errors.Should().ContainSingle(e => e.Contains("EXT123456789"));
-        _partnerRepoMock.Verify(r => r.InsertPartnerAsync(It.IsAny<Partner>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -65,10 +65,6 @@ public class PartnerServiceTests
     {
         var request = ValidRequest();
         request.ExternalCode = "EXT123456789";
-
-        _partnerRepoMock
-            .Setup(r => r.ExternalCodeExistsAsync("EXT123456789", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(false);
 
         _partnerRepoMock
             .Setup(r => r.InsertPartnerAsync(It.IsAny<Partner>(), It.IsAny<CancellationToken>()))

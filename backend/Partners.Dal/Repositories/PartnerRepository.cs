@@ -1,6 +1,8 @@
 using System.Data;
 using Dapper;
+using Microsoft.Data.SqlClient;
 using Partners.Core.Contracts;
+using Partners.Core.Exceptions;
 using Partners.Core.Models;
 using Partners.Dal.Database;
 using Partners.Dal.Helpers;
@@ -69,21 +71,26 @@ public class PartnerRepository : IPartnerRepository
             commandType: CommandType.StoredProcedure,
             cancellationToken: cancellationToken);
 
-        return await connection.QuerySingleAsync<int>(command);
+        try
+        {
+            return await connection.QuerySingleAsync<int>(command);
+        }
+        catch (SqlException ex) when (ex.Number is 2601 or 2627)
+        {
+            throw new DuplicateExternalCodeException(partner.ExternalCode!);
+        }
     }
 
-    public async Task<bool> ExternalCodeExistsAsync(string externalCode, CancellationToken cancellationToken = default)
+    public async Task<bool> PartnerExistsAsync(int id, CancellationToken cancellationToken = default)
     {
         await using var connection = await _dbConnectionFactory.CreateConnectionAsync(cancellationToken);
 
         var command = new CommandDefinition(
-            "dbo.ExternalCodeExists",
-            new { ExternalCode = externalCode },
+            "dbo.PartnerExists",
+            new { Id = id },
             commandType: CommandType.StoredProcedure,
             cancellationToken: cancellationToken);
 
-        var count = await connection.QuerySingleAsync<int>(command);
-
-        return count > 0;
+        return await connection.QuerySingleAsync<bool>(command);
     }
 }

@@ -20,8 +20,8 @@ public class PolicyService : IPolicyService
 
     public async Task<Result<PolicyCreated>> CreatePolicyAsync(CreatePolicyRequest request, CancellationToken cancellationToken = default)
     {
-        var partner = await _partnerRepository.FetchPartnerByIdAsync(request.PartnerId!.Value, cancellationToken);
-        if (partner is null)
+        var partnerExists = await _partnerRepository.PartnerExistsAsync(request.PartnerId!.Value, cancellationToken);
+        if (!partnerExists)
         {
             return Result<PolicyCreated>.Fail($"Partner with Id '{request.PartnerId}' does not exist.");
         }

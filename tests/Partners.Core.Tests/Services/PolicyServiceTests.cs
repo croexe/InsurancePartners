@@ -29,8 +29,8 @@ public class PolicyServiceTests
     public async Task CreateAsync_PartnerDoesNotExist_ReturnsFail()
     {
         _partnerRepoMock
-            .Setup(r => r.FetchPartnerByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Partner?)null);
+            .Setup(r => r.PartnerExistsAsync(1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
 
         var result = await _service.CreatePolicyAsync(ValidRequest());
 
@@ -43,8 +43,8 @@ public class PolicyServiceTests
     public async Task CreateAsync_ValidRequest_ReturnsOkWithPolicyResponse()
     {
         _partnerRepoMock
-            .Setup(r => r.FetchPartnerByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Partner { Id = 1 });
+            .Setup(r => r.PartnerExistsAsync(1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
 
         _policyRepoMock
             .Setup(r => r.InsertPolicyAsync(It.IsAny<Policy>(), It.IsAny<CancellationToken>()))
@@ -66,8 +66,8 @@ public class PolicyServiceTests
     public async Task CreateAsync_PartnerOverThreshold_ReturnsResultFlagged()
     {
         _partnerRepoMock
-            .Setup(r => r.FetchPartnerByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Partner { Id = 1 });
+            .Setup(r => r.PartnerExistsAsync(1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
 
         _policyRepoMock
             .Setup(r => r.InsertPolicyAsync(It.IsAny<Policy>(), It.IsAny<CancellationToken>()))

@@ -1,6 +1,7 @@
 using Partners.Core.Contracts;
 using Partners.Core.DTOs.Requests;
 using Partners.Core.DTOs.Responses;
+using Partners.Core.Exceptions;
 using Partners.Core.Mapping;
 using Partners.Core.Results;
 
@@ -39,18 +40,16 @@ public class PartnerService : IPartnerService
 
     public async Task<Result<int>> CreatePartnerAsync(CreatePartnerRequest request, CancellationToken cancellationToken = default)
     {
-        if (!string.IsNullOrWhiteSpace(request.ExternalCode))
-        {
-            var exists = await _partnerRepository.ExternalCodeExistsAsync(request.ExternalCode, cancellationToken);
-            if (exists)
-            {
-                return Result<int>.Fail($"ExternalCode '{request.ExternalCode}' is already in use.");
-            }
-        }
-
         var partner = request.ToPartner();
-        var newId = await _partnerRepository.InsertPartnerAsync(partner, cancellationToken);
 
-        return Result<int>.Ok(newId);
+        try
+        {
+            var newId = await _partnerRepository.InsertPartnerAsync(partner, cancellationToken);
+            return Result<int>.Ok(newId);
+        }
+        catch (DuplicateExternalCodeException)
+        {
+            return Result<int>.Fail($"ExternalCode '{request.ExternalCode}' is already in use.");
+        }
     }
 }

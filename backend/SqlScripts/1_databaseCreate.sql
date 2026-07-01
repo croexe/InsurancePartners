@@ -19,6 +19,7 @@ IF OBJECT_ID('dbo.GetAllPartners', 'P') IS NOT NULL DROP PROCEDURE dbo.GetAllPar
 IF OBJECT_ID('dbo.GetAllPartnersWithPolicySummeries', 'P') IS NOT NULL DROP PROCEDURE dbo.GetAllPartnersWithPolicySummeries;
 IF OBJECT_ID('dbo.GetAllPartnersWithPolicySummeriesFirstServe', 'P') IS NOT NULL DROP PROCEDURE dbo.GetAllPartnersWithPolicySummeriesFirstServe;
 IF OBJECT_ID('dbo.GetPartnerById', 'P') IS NOT NULL DROP PROCEDURE dbo.GetPartnerById;
+IF OBJECT_ID('dbo.PartnerExists', 'P') IS NOT NULL DROP PROCEDURE dbo.PartnerExists;
 IF OBJECT_ID('dbo.CreatePartner', 'P') IS NOT NULL DROP PROCEDURE dbo.CreatePartner;
 IF OBJECT_ID('dbo.ExternalCodeExists', 'P') IS NOT NULL DROP PROCEDURE dbo.ExternalCodeExists;
 IF OBJECT_ID('dbo.GetPoliciesByPartnerId', 'P') IS NOT NULL DROP PROCEDURE dbo.GetPoliciesByPartnerId;
@@ -142,13 +143,11 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.ExternalCodeExists
-    @ExternalCode NVARCHAR(20)
+CREATE OR ALTER PROCEDURE dbo.PartnerExists
+    @Id INT
 AS
 BEGIN
-    SELECT COUNT(1)
-    FROM dbo.Partner
-    WHERE ExternalCode = @ExternalCode;
+    SELECT CAST(CASE WHEN EXISTS (SELECT 1 FROM dbo.Partner WHERE Id = @Id) THEN 1 ELSE 0 END AS BIT);
 END
 GO
 
