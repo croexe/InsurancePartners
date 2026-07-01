@@ -43,7 +43,7 @@ public static class PolicyEndpoints
             catch (Exception ex)
             {
                 loggerFactory
-                    .CreateLogger("Partners.Api.Endpoints.PolicyEndpoints")
+                    .CreateLogger(typeof(PolicyEndpoints).FullName!)
                     .LogWarning(ex,
                         "Polica {PolicyId} je spremljena, ali real-time notifikacija o flagu partnera {PartnerId} nije uspjela.",
                         result.Value!.Policy.Id, result.Value.Policy.PartnerId);
