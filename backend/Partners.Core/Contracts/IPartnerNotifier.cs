@@ -1,7 +1,6 @@
-﻿namespace Partners.Core.Contracts
+﻿namespace Partners.Core.Contracts;
+
+public interface IPartnerNotifier
 {
-    public interface IPartnerNotifier
-    {
-        Task NotifyPartnerFlagChangedAsync(int partnerId, bool isFlagged);
-    }
+    Task NotifyPartnerFlagChangedAsync(int partnerId, bool isFlagged);
 }

@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
-namespace Partners.Api.Hubs
+namespace Partners.Api.Hubs;
+
+public class PartnerHub : Hub
 {
-    public class PartnerHub : Hub
-    {
-    }
 }

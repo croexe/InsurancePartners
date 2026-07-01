@@ -2,24 +2,23 @@
 using Partners.Api.Hubs;
 using Partners.Core.Contracts;
 
-namespace Partners.Api.Notifications
+namespace Partners.Api.Notifications;
+
+public class SignalRPartnerNotifier : IPartnerNotifier
 {
-    public class SignalRPartnerNotifier : IPartnerNotifier
+    private readonly IHubContext<PartnerHub> _hubContext;
+
+    public SignalRPartnerNotifier(IHubContext<PartnerHub> hubContext)
     {
-        private readonly IHubContext<PartnerHub> _hubContext;
+        _hubContext = hubContext;
+    }
 
-        public SignalRPartnerNotifier(IHubContext<PartnerHub> hubContext)
+    public Task NotifyPartnerFlagChangedAsync(int partnerId, bool isFlagged)
+    {
+        return _hubContext.Clients.All.SendAsync("PartnerFlagChanged", new
         {
-            _hubContext = hubContext;
-        }
-
-        public Task NotifyPartnerFlagChangedAsync(int partnerId, bool isFlagged)
-        {
-            return _hubContext.Clients.All.SendAsync("PartnerFlagChanged", new
-            {
-                partnerId,
-                isFlagged
-            });
-        }
+            partnerId,
+            isFlagged
+        });
     }
 }

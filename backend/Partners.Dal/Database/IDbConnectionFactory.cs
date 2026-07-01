@@ -1,9 +1,8 @@
 using System.Data;
 
-namespace Partners.Dal.Database
+namespace Partners.Dal.Database;
+
+public interface IDbConnectionFactory
 {
-    public interface IDbConnectionFactory
-    {
-        Task<IDbConnection> CreateConnectionAsync(CancellationToken cancellationToken = default);
-    }
+    Task<IDbConnection> CreateConnectionAsync(CancellationToken cancellationToken = default);
 }
