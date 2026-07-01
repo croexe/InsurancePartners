@@ -2,7 +2,6 @@ using Partners.Core.Contracts;
 using Partners.Core.DTOs.Requests;
 using Partners.Core.DTOs.Responses;
 using Partners.Core.Mapping;
-using Partners.Core.Models;
 using Partners.Core.Results;
 
 namespace Partners.Core.Services;
@@ -49,20 +48,7 @@ public class PartnerService : IPartnerService
             }
         }
 
-        var partner = new Partner
-        {
-            FirstName = request.FirstName.Trim(),
-            LastName = request.LastName.Trim(),
-            Address = request.Address?.Trim(),
-            PartnerNumber = request.PartnerNumber,
-            CroatianPIN = request.CroatianPIN,
-            PartnerTypeId = request.PartnerTypeId!.Value,
-            CreateByUser = request.CreateByUser.Trim(),
-            IsForeign = request.IsForeign!.Value,
-            ExternalCode = request.ExternalCode,
-            Gender = request.Gender!.Value
-        };
-
+        var partner = request.ToPartner();
         var newId = await _partnerRepository.InsertPartnerAsync(partner, cancellationToken);
 
         return Result<int>.Ok(newId);

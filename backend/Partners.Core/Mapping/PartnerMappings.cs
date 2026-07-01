@@ -1,3 +1,4 @@
+using Partners.Core.DTOs.Requests;
 using Partners.Core.DTOs.Responses;
 using Partners.Core.Models;
 using Partners.Core.Models.Rules.Partner;
@@ -7,6 +8,20 @@ namespace Partners.Core.Mapping;
 
 public static class PartnerMappings
 {
+    public static Partner ToPartner(this CreatePartnerRequest request) => new()
+    {
+        FirstName = request.FirstName.Trim(),
+        LastName = request.LastName.Trim(),
+        Address = request.Address?.Trim(),
+        PartnerNumber = request.PartnerNumber,
+        CroatianPIN = request.CroatianPIN,
+        PartnerTypeId = request.PartnerTypeId!.Value,
+        CreateByUser = request.CreateByUser.Trim(),
+        IsForeign = request.IsForeign!.Value,
+        ExternalCode = request.ExternalCode,
+        Gender = request.Gender!.Value
+    };
+
     public static PartnerListItemResponse ToListItemResponse(this PartnerWithSummary item)
     {
         var partner = item.Partner;

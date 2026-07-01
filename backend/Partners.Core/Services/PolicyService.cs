@@ -1,7 +1,7 @@
 using Partners.Core.Contracts;
 using Partners.Core.DTOs.Requests;
 using Partners.Core.DTOs.Responses;
-using Partners.Core.Models;
+using Partners.Core.Mapping;
 using Partners.Core.Models.Rules.Partner;
 using Partners.Core.Results;
 
@@ -26,13 +26,7 @@ public class PolicyService : IPolicyService
             return Result<PolicyCreated>.Fail($"Partner with Id '{request.PartnerId}' does not exist.");
         }
 
-        var policy = new Policy
-        {
-            PolicyNumber = request.PolicyNumber.Trim(),
-            Amount = request.Amount!.Value,
-            PartnerId = request.PartnerId!.Value
-        };
-
+        var policy = request.ToPolicy();
         var newId = await _policyRepository.InsertPolicyAsync(policy, cancellationToken);
 
         var response = new PolicyResponse
