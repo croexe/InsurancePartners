@@ -77,14 +77,14 @@ public class PartnerService : IPartnerService
         };
     }
 
-    public async Task<PartnerServiceResult> CreatePartnerAsync(CreatePartnerRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<int>> CreatePartnerAsync(CreatePartnerRequest request, CancellationToken cancellationToken = default)
     {
         if (!string.IsNullOrWhiteSpace(request.ExternalCode))
         {
             var exists = await _partnerRepository.ExternalCodeExistsAsync(request.ExternalCode, cancellationToken);
             if (exists)
             {
-                return PartnerServiceResult.Fail($"ExternalCode '{request.ExternalCode}' is already in use.");
+                return Result<int>.Fail($"ExternalCode '{request.ExternalCode}' is already in use.");
             }
         }
 
@@ -104,7 +104,7 @@ public class PartnerService : IPartnerService
 
         var newId = await _partnerRepository.InsertPartnerAsync(partner, cancellationToken);
 
-        return PartnerServiceResult.Ok(newId);
+        return Result<int>.Ok(newId);
     }
 
     private static bool IsFlagged(int policyCount, decimal totalAmount) =>

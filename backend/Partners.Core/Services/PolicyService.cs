@@ -18,12 +18,12 @@ public class PolicyService : IPolicyService
         _partnerRepository = partnerRepository;
     }
 
-    public async Task<PolicyServiceResult> CreatePolicyAsync(CreatePolicyRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<PolicyCreated>> CreatePolicyAsync(CreatePolicyRequest request, CancellationToken cancellationToken = default)
     {
         var partner = await _partnerRepository.FetchPartnerByIdAsync(request.PartnerId!.Value, cancellationToken);
         if (partner is null)
         {
-            return PolicyServiceResult.Fail($"Partner with Id '{request.PartnerId}' does not exist.");
+            return Result<PolicyCreated>.Fail($"Partner with Id '{request.PartnerId}' does not exist.");
         }
 
         var policy = new Policy
@@ -46,6 +46,6 @@ public class PolicyService : IPolicyService
         var summary = await _policyRepository.FetchPolicySummaryByPartnerIdAsync(policy.PartnerId, cancellationToken);
         var isFlagged = PartnerFlagRules.IsFlagged(summary.PolicyCount, summary.TotalAmount);
 
-        return PolicyServiceResult.Ok(response, isFlagged);
+        return Result<PolicyCreated>.Ok(new PolicyCreated(response, isFlagged));
     }
 }

@@ -57,9 +57,9 @@ public class PolicyServiceTests
         var result = await _service.CreatePolicyAsync(ValidRequest());
 
         result.Success.Should().BeTrue();
-        result.Policy.Should().NotBeNull();
-        result.Policy!.Id.Should().Be(10);
-        result.Policy.Amount.Should().Be(500m);
+        result.Value.Should().NotBeNull();
+        result.Value!.Policy.Id.Should().Be(10);
+        result.Value!.Policy.Amount.Should().Be(500m);
     }
 
     [Fact]
@@ -80,6 +80,6 @@ public class PolicyServiceTests
         var result = await _service.CreatePolicyAsync(ValidRequest());
 
         result.Success.Should().BeTrue();
-        result.IsFlagged.Should().BeTrue();
+        result.Value!.IsFlagged.Should().BeTrue();
     }
 }

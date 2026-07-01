@@ -5,6 +5,6 @@ namespace Partners.Core.Contracts
 {
     public interface IPolicyService
     {
-        Task<PolicyServiceResult> CreatePolicyAsync(CreatePolicyRequest request, CancellationToken cancellationToken = default);
+        Task<Result<PolicyCreated>> CreatePolicyAsync(CreatePolicyRequest request, CancellationToken cancellationToken = default);
     }
 }

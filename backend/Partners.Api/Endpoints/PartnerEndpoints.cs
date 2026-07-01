@@ -49,7 +49,7 @@ public static class PartnerEndpoints
 
             await outputCacheStore.EvictByTagAsync(CacheConstants.PartnersTag, cancellationToken);
 
-            return Results.Created($"/api/partners/{result.PartnerId}", new { id = result.PartnerId });
+            return Results.Created($"/api/partners/{result.Value}", new { id = result.Value });
         })
         .Produces(StatusCodes.Status201Created)
         .ProducesProblem(StatusCodes.Status400BadRequest);

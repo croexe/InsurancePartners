@@ -57,7 +57,7 @@ public class PartnerServiceTests
         var result = await _service.CreatePartnerAsync(ValidRequest());
 
         result.Success.Should().BeTrue();
-        result.PartnerId.Should().Be(42);
+        result.Value.Should().Be(42);
     }
 
     [Fact]

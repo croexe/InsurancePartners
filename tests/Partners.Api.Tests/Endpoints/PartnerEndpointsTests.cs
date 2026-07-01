@@ -63,7 +63,7 @@ public class PartnerEndpointsTests : IClassFixture<CustomWebApplicationFactory>
         var token = await _factory.GetValidTokenAsync();
         _factory.PartnerServiceMock
             .Setup(s => s.CreatePartnerAsync(It.IsAny<CreatePartnerRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(PartnerServiceResult.Ok(1));
+            .ReturnsAsync(Result<int>.Ok(1));
 
         var request = new CreatePartnerRequest
         {
@@ -141,7 +141,7 @@ public class PartnerEndpointsTests : IClassFixture<CustomWebApplicationFactory>
             .ReturnsAsync(Enumerable.Empty<PartnerListItemResponse>());
         factory.PartnerServiceMock
             .Setup(s => s.CreatePartnerAsync(It.IsAny<CreatePartnerRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(PartnerServiceResult.Ok(1));
+            .ReturnsAsync(Result<int>.Ok(1));
 
         var token = await factory.GetValidTokenAsync();
         var client = factory.CreateClient();

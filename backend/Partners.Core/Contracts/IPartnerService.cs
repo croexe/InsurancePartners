@@ -8,6 +8,6 @@ namespace Partners.Core.Contracts
     {
         Task<IEnumerable<PartnerListItemResponse>> GetAllPartnersAsync(CancellationToken cancellationToken = default);
         Task<PartnerDetailResponse?> GetPartnerDetailsByIdAsync(int id, CancellationToken cancellationToken = default);
-        Task<PartnerServiceResult> CreatePartnerAsync(CreatePartnerRequest request, CancellationToken cancellationToken = default);
+        Task<Result<int>> CreatePartnerAsync(CreatePartnerRequest request, CancellationToken cancellationToken = default);
     }
 }

@@ -34,13 +34,13 @@ public class PolicyEndpointsTests : IClassFixture<CustomWebApplicationFactory>
         var token = await _factory.GetValidTokenAsync();
         _factory.PolicyServiceMock
             .Setup(s => s.CreatePolicyAsync(It.IsAny<CreatePolicyRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(PolicyServiceResult.Ok(new PolicyResponse
+            .ReturnsAsync(Result<PolicyCreated>.Ok(new PolicyCreated(new PolicyResponse
             {
                 Id = 1,
                 PolicyNumber = "POL1234567",
                 Amount = 500m,
                 PartnerId = 1
-            }, isFlagged: true));
+            }, true)));
 
         var request = new CreatePolicyRequest
         {
@@ -63,13 +63,13 @@ public class PolicyEndpointsTests : IClassFixture<CustomWebApplicationFactory>
         var token = await _factory.GetValidTokenAsync();
         _factory.PolicyServiceMock
             .Setup(s => s.CreatePolicyAsync(It.IsAny<CreatePolicyRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(PolicyServiceResult.Ok(new PolicyResponse
+            .ReturnsAsync(Result<PolicyCreated>.Ok(new PolicyCreated(new PolicyResponse
             {
                 Id = 2,
                 PolicyNumber = "POL7654321",
                 Amount = 500m,
                 PartnerId = 99
-            }, isFlagged: false));
+            }, false)));
 
         // Specifican partnerId (99) da setup ne kontaminira ostale testove koji koriste partnerId 1.
         _factory.PartnerNotifierMock

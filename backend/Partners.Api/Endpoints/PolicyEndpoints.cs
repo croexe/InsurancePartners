@@ -37,7 +37,7 @@ public static class PolicyEndpoints
             // Notifikacija je sporedni efekt — njen neuspjeh ne smije srušiti uspješno kreiranu policu.
             try
             {
-                await notifier.NotifyPartnerFlagChangedAsync(result.Policy!.PartnerId, result.IsFlagged);
+                await notifier.NotifyPartnerFlagChangedAsync(result.Value!.Policy.PartnerId, result.Value.IsFlagged);
             }
             catch (Exception ex)
             {
@@ -45,10 +45,10 @@ public static class PolicyEndpoints
                     .CreateLogger("Partners.Api.Endpoints.PolicyEndpoints")
                     .LogWarning(ex,
                         "Polica {PolicyId} je spremljena, ali real-time notifikacija o flagu partnera {PartnerId} nije uspjela.",
-                        result.Policy!.Id, result.Policy.PartnerId);
+                        result.Value!.Policy.Id, result.Value.Policy.PartnerId);
             }
 
-            return Results.Created($"/api/partners/{result.Policy!.PartnerId}", result.Policy);
+            return Results.Created($"/api/partners/{result.Value!.Policy.PartnerId}", result.Value.Policy);
         })
         .Produces<PolicyResponse>(StatusCodes.Status201Created)
         .ProducesProblem(StatusCodes.Status400BadRequest);
