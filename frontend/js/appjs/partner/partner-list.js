@@ -1,25 +1,28 @@
 import { createPaginator } from "../helpers/pagination.js";
-import { escapeHtml,showAlert } from "../helpers/helpers.js";
+import { escapeHtml, showAlert } from "../helpers/helpers.js";
 import { api } from "../../api.js";
 import { ApiError } from "../errors/apiError.js";
 import { openPartnerDetail } from "./partner-detail.js";
 import { onPartnerFlagChanged } from "../services/signalr-client.js";
 
+const pageSize = 10;
 let currentPartners = [];
 
 const partnerPaginator = createPaginator({
-    pageSize: 10,
+    pageSize: pageSize,
     infoElementId: "paginationInfo",
     controlsElementId: "paginationControls",
     itemNoun: "partnera",
     windowed: true,
-    onRender: renderPartnerRows
+    onPageChange: loadPartners
 });
 
-export async function loadPartners() {
+export async function loadPartners(page = 1) {
     try {
-        currentPartners = await api.getPartners();
-        partnerPaginator.setItems(currentPartners);
+        const result = await api.getPartners(page, pageSize);
+        currentPartners = result.items;
+        renderPartnerRows(currentPartners);
+        partnerPaginator.update({ page: result.page, totalCount: result.totalCount });
     } catch (error) {
         if (error instanceof ApiError && error.status === 401) {
             return;
@@ -73,7 +76,7 @@ export function wireSignalRListener() {
         const partner = currentPartners.find(function (candidate) { return candidate.id === data.partnerId; });
         if (partner) {
             partner.isFlagged = data.isFlagged;
-            partnerPaginator.render();
+            renderPartnerRows(currentPartners);
             const badge = document.querySelector('.partner-row[data-id="' + data.partnerId + '"] .flag-badge');
             if (badge) {
                 badge.classList.add("pulse");

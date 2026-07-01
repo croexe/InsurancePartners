@@ -3,16 +3,23 @@ import { escapeHtml,showAlert } from "../helpers/helpers.js";
 import { api } from "../../api.js";
 import { ApiError } from "../errors/apiError.js";
 
+const pageSize = 5;
 let currentModalPolicies = [];
 
 const policyPaginator = createPaginator({
-    pageSize: 5,
+    pageSize: pageSize,
     infoElementId: "policyPaginationInfo",
     controlsElementId: "policyPaginationControls",
     itemNoun: "polica",
     windowed: false,
-    onRender: renderPolicyRows
+    onPageChange: showPolicyPage
 });
+
+function showPolicyPage(page) {
+    const startIndex = (page - 1) * pageSize;
+    renderPolicyRows(currentModalPolicies.slice(startIndex, startIndex + pageSize));
+    policyPaginator.update({ page: page, totalCount: currentModalPolicies.length });
+}
 
 export async function openPartnerDetail(id) {
     try {
@@ -47,7 +54,7 @@ export async function openPartnerDetail(id) {
             "</div>";
 
         currentModalPolicies = partner.policies;
-        policyPaginator.setItems(currentModalPolicies);
+        showPolicyPage(1);
 
         $("#partnerDetailModal").modal("show");
     } catch (error) {

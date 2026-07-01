@@ -4,18 +4,13 @@ export function createPaginator(options) {
     const controlsElementId = options.controlsElementId;
     const itemNoun = options.itemNoun;
     const windowed = options.windowed === true;
-    const onRender = options.onRender;
+    const onPageChange = options.onPageChange;
 
-    let items = [];
     let currentPage = 1;
+    let totalCount = 0;
 
     function totalPages() {
-        return Math.max(1, Math.ceil(items.length / pageSize));
-    }
-
-    function currentPageItems() {
-        const startIndex = (currentPage - 1) * pageSize;
-        return items.slice(startIndex, startIndex + pageSize);
+        return Math.max(1, Math.ceil(totalCount / pageSize));
     }
 
     function pageButton(page, label, disabled, active) {
@@ -28,13 +23,13 @@ export function createPaginator(options) {
         if (!infoElement) {
             return;
         }
-        if (items.length === 0) {
+        if (totalCount === 0) {
             infoElement.textContent = "";
             return;
         }
         const startIndex = (currentPage - 1) * pageSize + 1;
-        const endIndex = Math.min(currentPage * pageSize, items.length);
-        infoElement.textContent = startIndex + "–" + endIndex + " od " + items.length + " " + itemNoun;
+        const endIndex = Math.min(currentPage * pageSize, totalCount);
+        infoElement.textContent = startIndex + "–" + endIndex + " od " + totalCount + " " + itemNoun;
     }
 
     function renderControls() {
@@ -69,25 +64,20 @@ export function createPaginator(options) {
         });
     }
 
-    function render() {
-        if (currentPage > totalPages()) {
-            currentPage = totalPages();
+    function goToPage(page) {
+        const target = Math.min(Math.max(1, page), totalPages());
+        if (target === currentPage) {
+            return;
         }
-        onRender(currentPageItems());
+        onPageChange(target);
+    }
+
+    function update(state) {
+        totalCount = state.totalCount ?? 0;
+        currentPage = state.page ?? 1;
         renderInfo();
         renderControls();
     }
 
-    function goToPage(page) {
-        currentPage = Math.min(Math.max(1, page), totalPages());
-        render();
-    }
-
-    function setItems(newItems) {
-        items = newItems ?? [];
-        currentPage = 1;
-        render();
-    }
-
-    return { setItems, goToPage, render };
+    return { update };
 }
