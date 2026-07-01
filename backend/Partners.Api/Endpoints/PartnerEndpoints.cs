@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.OutputCaching;
 using Partners.Api.Constants;
+using Partners.Api.Endpoints.Extensions;
 using Partners.Core.Constants;
 using Partners.Core.Contracts;
 using Partners.Core.DTOs.Requests;

@@ -1,6 +1,6 @@
 using Partners.Core.Results;
 
-namespace Partners.Api.Endpoints;
+namespace Partners.Api.Endpoints.Extensions;
 
 internal static class ResultExtensions
 {

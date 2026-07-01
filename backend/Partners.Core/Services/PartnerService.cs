@@ -33,7 +33,7 @@ public class PartnerService : IPartnerService
             CreatedAtUtc = item.Partner.CreatedAtUtc,
             IsForeign = item.Partner.IsForeign,
             Gender = item.Partner.Gender.ToString(),
-            IsFlagged = IsFlagged(item.PolicyCount, item.TotalAmount)
+            IsFlagged = PartnerFlagRules.IsFlagged(item.PolicyCount, item.TotalAmount)
         });
     }
 
@@ -72,7 +72,7 @@ public class PartnerService : IPartnerService
             IsForeign = partner.IsForeign,
             ExternalCode = partner.ExternalCode,
             Gender = partner.Gender.ToString(),
-            IsFlagged = IsFlagged(policyCount, totalAmount),
+            IsFlagged = PartnerFlagRules.IsFlagged(policyCount, totalAmount),
             Policies = policyResponses
         };
     }
@@ -106,7 +106,4 @@ public class PartnerService : IPartnerService
 
         return Result<int>.Ok(newId);
     }
-
-    private static bool IsFlagged(int policyCount, decimal totalAmount) =>
-        PartnerFlagRules.IsFlagged(policyCount, totalAmount);
 }
