@@ -1,9 +1,8 @@
 using Partners.Core.Contracts;
 using Partners.Core.DTOs.Requests;
 using Partners.Core.DTOs.Responses;
+using Partners.Core.Mapping;
 using Partners.Core.Models;
-using Partners.Core.Models.Rules.Partner;
-using Partners.Core.Presentation;
 using Partners.Core.Results;
 
 namespace Partners.Core.Services;
@@ -23,18 +22,7 @@ public class PartnerService : IPartnerService
     {
         var partners = await _partnerRepository.FetchAllPartnersAsync(cancellationToken);
 
-        return partners.Select(item => new PartnerListItemResponse
-        {
-            Id = item.Partner.Id,
-            FullName = $"{item.Partner.FirstName} {item.Partner.LastName}",
-            PartnerNumber = item.Partner.PartnerNumber,
-            CroatianPIN = item.Partner.CroatianPIN,
-            PartnerTypeName = item.Partner.PartnerTypeId.ToDisplayName(),
-            CreatedAtUtc = item.Partner.CreatedAtUtc,
-            IsForeign = item.Partner.IsForeign,
-            Gender = item.Partner.Gender.ToString(),
-            IsFlagged = PartnerFlagRules.IsFlagged(item.PolicyCount, item.TotalAmount)
-        });
+        return partners.Select(item => item.ToListItemResponse());
     }
 
     public async Task<PartnerDetailResponse?> GetPartnerDetailsByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -46,35 +34,8 @@ public class PartnerService : IPartnerService
         }
 
         var policies = await _policyRepository.FetchAllPoliciesByPartnerIdAsync(id, cancellationToken);
-        var policyResponses = policies
-            .Select(p => new PolicyResponse
-            {
-                Id = p.Id,
-                PolicyNumber = p.PolicyNumber,
-                Amount = p.Amount,
-                PartnerId = p.PartnerId
-            })
-            .ToList();
 
-        var policyCount = policyResponses.Count;
-        var totalAmount = policyResponses.Sum(p => p.Amount);
-
-        return new PartnerDetailResponse
-        {
-            Id = partner.Id,
-            FullName = $"{partner.FirstName} {partner.LastName}",
-            Address = partner.Address,
-            PartnerNumber = partner.PartnerNumber,
-            CroatianPIN = partner.CroatianPIN,
-            PartnerTypeName = partner.PartnerTypeId.ToDisplayName(),
-            CreatedAtUtc = partner.CreatedAtUtc,
-            CreateByUser = partner.CreateByUser,
-            IsForeign = partner.IsForeign,
-            ExternalCode = partner.ExternalCode,
-            Gender = partner.Gender.ToString(),
-            IsFlagged = PartnerFlagRules.IsFlagged(policyCount, totalAmount),
-            Policies = policyResponses
-        };
+        return partner.ToDetailResponse(policies);
     }
 
     public async Task<Result<int>> CreatePartnerAsync(CreatePartnerRequest request, CancellationToken cancellationToken = default)
